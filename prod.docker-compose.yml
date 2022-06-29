@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: ./
+      dockerfile: prod.Dockerfile
+      args:
+        SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL_PROD}
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - tmp:/tmp
+    environment:
+      STARTUP_CLASS: ${STARTUP_CLASS}
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL_PROD}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "8081:8080"
+
+  mysql:
+    image: mysql:8.0
+    restart: always
+    ports:
+      - 3307:3306
+    volumes:
+      - mysql:/var/lib/mysql
+      - ./src/main/resources/db:/docker-entrypoint-initdb.d:ro
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+    healthcheck:
+      test: "mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} -e 'SELECT 1;' ${DATABASE_NAME}"
+      start_period: 10s
+      interval: 5s
+      timeout: 60s
+      retries: 10
+    # secrets:
+    #   - db-password
+
+volumes:
+  mysql: {}
+  tmp: {}
+# secrets:
+#   db-password:
+#     file: db/password.txt
