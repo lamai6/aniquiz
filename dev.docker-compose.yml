@@ -18,6 +18,7 @@ services:
       - aniquiz_dev
     environment:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL_DEV}
+      SPRING_DATASOURCE_URL_TEST: ${SPRING_DATASOURCE_URL_TEST}
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
     ports:
@@ -47,8 +48,31 @@ services:
       timeout: 60s
       retries: 10
 
+  mysql_test:
+    image: mysql:8.0
+    restart: unless-stopped
+    ports:
+      - 3307:3306
+    volumes:
+      - mysql_test:/var/lib/mysql
+      - ./src/main/resources/db:/docker-entrypoint-initdb.d:ro
+    networks:
+      - aniquiz_dev
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_TEST_USER}
+      MYSQL_PASSWORD: ${MYSQL_TEST_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+    healthcheck:
+      test: "mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} -e 'SELECT 1;' ${DATABASE_NAME}"
+      start_period: 10s
+      interval: 5s
+      timeout: 60s
+      retries: 10
+
 volumes:
   mysql_dev: {}
+  mysql_test: {}
 networks:
   aniquiz_dev:
     name: aniquiz_dev
