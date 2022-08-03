@@ -1,5 +1,6 @@
 package app.ganime.aniquiz.it.series;
 
+import app.ganime.aniquiz.dto.SeriesDTO;
 import app.ganime.aniquiz.it.HttpClient;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
