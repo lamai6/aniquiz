@@ -5,11 +5,14 @@ import app.ganime.aniquiz.series.SeriesController;
 import app.ganime.aniquiz.series.SeriesDTO;
 import app.ganime.aniquiz.series.SeriesService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.platform.commons.logging.Logger;
+import org.junit.platform.commons.logging.LoggerFactory;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,6 +30,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -37,17 +41,19 @@ public class SeriesControllerUnitTest {
 
 	private MockMvc mvc;
 	private JacksonTester<SeriesDTO> json;
+	private Logger logger = LoggerFactory.getLogger(SeriesControllerUnitTest.class);
 	private List<Series> seriesList;
 
 	@Mock
+	private ObjectMapper mapper;
+	@Mock
 	private SeriesService seriesService;
-
 	@InjectMocks
 	private SeriesController seriesController;
 
 	@BeforeEach
 	public void setup() {
-		JacksonTester.initFields(this, new ObjectMapper());
+		JacksonTester.initFields(this, JsonMapper.builder().findAndAddModules().build());
 		mvc = MockMvcBuilders.standaloneSetup(seriesController).build();
 		seriesList = Stream.of(new Series(1,"One Piece","Eichiro Oda",LocalDate.of(1999, 10, 20)),
 				new Series(2,"Bleach","Tite Kubo",LocalDate.of(2001, 8, 7)),
@@ -58,12 +64,20 @@ public class SeriesControllerUnitTest {
 	@Test
 	public void shouldRetrieveByIdWhenExists() throws Exception {
 		Series series = this.seriesList.stream().filter(s -> s.getId() == 2).findFirst().orElse(null);
+		SeriesDTO seriesDTO = SeriesDTO.builder()
+			.name(series.getName())
+			.author(series.getAuthor())
+			.releaseDate(series.getReleaseDate())
+			.build();
 		given(seriesService.getSeries(2)).willReturn(series);
+		given(mapper.convertValue(any(Series.class), eq(SeriesDTO.class))).willReturn(seriesDTO);
 
 		MockHttpServletResponse response = mvc.perform(get("/series/2").accept(MediaType.APPLICATION_JSON))
 			.andReturn()
 			.getResponse();
 
+		String jsonBody = response.getContentAsString();
+		logger.info(() -> "==================> " + jsonBody);
 		JSONObject body = new JSONObject(response.getContentAsString());
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 		assertThat(body.get("name")).isEqualTo(series.getName());
@@ -86,19 +100,22 @@ public class SeriesControllerUnitTest {
 
 	@Test
 	public void shouldAddNewSeriesSentByUser() throws Exception {
-		SeriesDTO seriesSentByUser = SeriesDTO.builder()
+		SeriesDTO userSeries = SeriesDTO.builder()
 			.name("Hunter x Hunter")
 			.author("Yoshihiro Togashi")
 			.releaseDate(LocalDate.of(1998, 3, 16))
 			.build();
-		given(seriesService.saveSeries(any(Series.class))).will(returnsFirstArg());
+		Series series = new Series(4, userSeries.getName(), userSeries.getAuthor(), userSeries.getReleaseDate());
+		given(mapper.convertValue(any(SeriesDTO.class), eq(Series.class))).willReturn(series);
+		given(seriesService.saveSeries(any(Series.class))).willReturn(series);
 
 		MockHttpServletResponse response = mvc.perform(post("/series")
-				.contentType(MediaType.APPLICATION_JSON).content(json.write(seriesSentByUser).getJson())
+				.contentType(MediaType.APPLICATION_JSON).content(json.write(userSeries).getJson())
 			)
 			.andReturn()
 			.getResponse();
 
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED.value());
+		assertThat(response.getContentAsString()).isEqualTo("4");
 	}
 }
