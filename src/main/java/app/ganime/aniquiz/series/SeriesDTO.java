@@ -2,10 +2,8 @@ package app.ganime.aniquiz.series;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
 import java.time.LocalDate;

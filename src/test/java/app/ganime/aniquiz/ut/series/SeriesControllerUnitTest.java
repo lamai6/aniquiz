@@ -11,8 +11,6 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.platform.commons.logging.Logger;
-import org.junit.platform.commons.logging.LoggerFactory;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -41,7 +39,6 @@ public class SeriesControllerUnitTest {
 
 	private MockMvc mvc;
 	private JacksonTester<SeriesDTO> json;
-	private Logger logger = LoggerFactory.getLogger(SeriesControllerUnitTest.class);
 	private List<Series> seriesList;
 
 	@Mock
@@ -76,8 +73,6 @@ public class SeriesControllerUnitTest {
 			.andReturn()
 			.getResponse();
 
-		String jsonBody = response.getContentAsString();
-		logger.info(() -> "==================> " + jsonBody);
 		JSONObject body = new JSONObject(response.getContentAsString());
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 		assertThat(body.get("name")).isEqualTo(series.getName());
@@ -107,7 +102,7 @@ public class SeriesControllerUnitTest {
 			.build();
 		Series series = new Series(4, userSeries.getName(), userSeries.getAuthor(), userSeries.getReleaseDate());
 		given(mapper.convertValue(any(SeriesDTO.class), eq(Series.class))).willReturn(series);
-		given(seriesService.saveSeries(any(Series.class))).willReturn(series);
+		given(seriesService.saveSeries(any(Series.class))).will(returnsFirstArg());
 
 		MockHttpServletResponse response = mvc.perform(post("/series")
 				.contentType(MediaType.APPLICATION_JSON).content(json.write(userSeries).getJson())

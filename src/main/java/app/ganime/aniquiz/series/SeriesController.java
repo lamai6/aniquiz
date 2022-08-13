@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/series")
@@ -17,8 +18,11 @@ public class SeriesController {
 	private ObjectMapper mapper;
 
 	@GetMapping
-	public List<Series> getSeries() {
-		return seriesService.getSeries();
+	public List<SeriesDTO> getSeries() {
+		List<Series> series = seriesService.getSeries();
+		return series.stream()
+			.map(s -> mapper.convertValue(s, SeriesDTO.class))
+			.collect(Collectors.toList());
 	}
 
 	@PostMapping
