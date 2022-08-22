@@ -66,7 +66,7 @@ public class SeriesControllerUnitTest {
 			.author(series.getAuthor())
 			.releaseDate(series.getReleaseDate())
 			.build();
-		given(seriesService.getSeries(2)).willReturn(series);
+		given(seriesService.getSeries(2L)).willReturn(series);
 		given(mapper.convertValue(any(Series.class), eq(SeriesDTO.class))).willReturn(seriesDTO);
 
 		MockHttpServletResponse response = mvc.perform(get("/series/2").accept(MediaType.APPLICATION_JSON))

@@ -55,7 +55,7 @@ public class SeriesServiceUnitTest {
 		final Long BLEACH_ID = 2L;
 		given(seriesRepository.findById(BLEACH_ID)).willReturn(Optional.ofNullable(seriesList.get(seriesList.size() - 1)));
 
-		Series series = seriesService.getSeries(BLEACH_ID.intValue());
+		Series series = seriesService.getSeries(BLEACH_ID);
 
 		assertThat(series.getName()).isEqualTo("Bleach");
 		assertThat(series.getAuthor()).isEqualTo("Tite Kubo");

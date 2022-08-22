@@ -33,7 +33,7 @@ public class SeriesController {
 	}
 
 	@GetMapping("/{id}")
-	public SeriesDTO getSeries(@PathVariable("id") int id) {
+	public SeriesDTO getSeries(@PathVariable("id") Long id) {
 		Series series = seriesService.getSeries(id);
 		return mapper.convertValue(series, SeriesDTO.class);
 	}
