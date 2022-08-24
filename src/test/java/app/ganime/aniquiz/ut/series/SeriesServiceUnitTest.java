@@ -1,5 +1,6 @@
 package app.ganime.aniquiz.ut.series;
 
+import app.ganime.aniquiz.config.exception.ResourceNotFoundException;
 import app.ganime.aniquiz.series.Series;
 import app.ganime.aniquiz.series.SeriesRepository;
 import app.ganime.aniquiz.series.SeriesService;
@@ -12,10 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -53,13 +54,24 @@ public class SeriesServiceUnitTest {
 	@Test
 	public void should_get_series_by_id() {
 		final Long BLEACH_ID = 2L;
-		given(seriesRepository.findById(BLEACH_ID)).willReturn(Optional.ofNullable(seriesList.get(seriesList.size() - 1)));
+		given(seriesRepository.findById(BLEACH_ID)).willReturn(seriesList.stream().filter(s -> s.getId() == 2).findFirst());
 
 		Series series = seriesService.getSeries(BLEACH_ID);
 
 		assertThat(series.getName()).isEqualTo("Bleach");
 		assertThat(series.getAuthor()).isEqualTo("Tite Kubo");
 		assertThat(series.getReleaseDate()).isEqualTo(LocalDate.of(2001, 8, 7));
+	}
+
+	@Test
+	public void should_throw_exception_when_series_does_not_exist() {
+		final Long NOT_EXISTING_ID = 8L;
+		final String message = "The resource you requested is not found";
+		given(seriesRepository.findById(NOT_EXISTING_ID)).willThrow(ResourceNotFoundException.class);
+
+		Throwable thrown = catchThrowable(() -> seriesService.getSeries(NOT_EXISTING_ID));
+
+		assertThat(thrown).isInstanceOf(ResourceNotFoundException.class);
 	}
 
 	@Test
