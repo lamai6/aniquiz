@@ -1,18 +1,26 @@
 package app.ganime.aniquiz.series;
 
+import app.ganime.aniquiz.config.exception.ResourceNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 
+@Service
 public class SeriesService {
 
-	public Series getSeries(int id) {
-		return null;
+	@Autowired
+	private SeriesRepository repository;
+
+	public Series getSeries(Long id) {
+		return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException());
 	}
 
 	public List<Series> getSeries() {
-		return null;
+		return repository.findAll();
 	}
 
 	public Series saveSeries(Series series) {
-		return null;
+		return repository.save(series);
 	}
 }
