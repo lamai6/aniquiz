@@ -36,9 +36,9 @@ public class SeriesServiceUnitTest {
 	@BeforeEach
 	private void setup() {
 		seriesList = Stream.of(
-				new Series(1,"One Piece","Eichiro Oda", LocalDate.of(1999, 10, 20)),
-				new Series(2,"Bleach","Tite Kubo", LocalDate.of(2001, 8, 7)),
-				new Series(3,"Hajime no Ippo","Joji Morikawa", LocalDate.of(1989, 10, 11)))
+				new Series(1L,"One Piece","Eichiro Oda", LocalDate.of(1999, 10, 20)),
+				new Series(2L,"Bleach","Tite Kubo", LocalDate.of(2001, 8, 7)),
+				new Series(3L,"Hajime no Ippo","Joji Morikawa", LocalDate.of(1989, 10, 11)))
 			.collect(Collectors.toList());
 	}
 
@@ -76,7 +76,7 @@ public class SeriesServiceUnitTest {
 
 	@Test
 	public void should_post_series_sent_by_user() {
-		Series series = new Series(4,"Hunter x Hunter", "Yoshihiro Togashi", LocalDate.of(1998, 3, 16));
+		Series series = new Series(4L,"Hunter x Hunter", "Yoshihiro Togashi", LocalDate.of(1998, 3, 16));
 		given(seriesRepository.save(any(Series.class))).will(returnsFirstArg());
 
 		Series seriesSaved = seriesService.saveSeries(series);

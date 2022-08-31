@@ -52,9 +52,9 @@ public class SeriesControllerUnitTest {
 	public void setup() {
 		JacksonTester.initFields(this, JsonMapper.builder().findAndAddModules().build());
 		mvc = MockMvcBuilders.standaloneSetup(seriesController).build();
-		seriesList = Stream.of(new Series(1,"One Piece","Eichiro Oda",LocalDate.of(1999, 10, 20)),
-				new Series(2,"Bleach","Tite Kubo",LocalDate.of(2001, 8, 7)),
-				new Series(3,"Hajime no Ippo","Joji Morikawa",LocalDate.of(1989, 10, 11)))
+		seriesList = Stream.of(new Series(1L,"One Piece","Eichiro Oda",LocalDate.of(1999, 10, 20)),
+				new Series(2L,"Bleach","Tite Kubo",LocalDate.of(2001, 8, 7)),
+				new Series(3L,"Hajime no Ippo","Joji Morikawa",LocalDate.of(1989, 10, 11)))
 			.collect(Collectors.toList());
 	}
 
@@ -100,7 +100,7 @@ public class SeriesControllerUnitTest {
 			.author("Yoshihiro Togashi")
 			.releaseDate(LocalDate.of(1998, 3, 16))
 			.build();
-		Series series = new Series(4, userSeries.getName(), userSeries.getAuthor(), userSeries.getReleaseDate());
+		Series series = new Series(4L, userSeries.getName(), userSeries.getAuthor(), userSeries.getReleaseDate());
 		given(mapper.convertValue(any(SeriesDTO.class), eq(Series.class))).willReturn(series);
 		given(seriesService.saveSeries(any(Series.class))).will(returnsFirstArg());
 

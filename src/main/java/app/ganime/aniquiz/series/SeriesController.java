@@ -27,7 +27,7 @@ public class SeriesController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public int postSeries(@RequestBody SeriesDTO seriesDTO) {
+	public Long postSeries(@RequestBody SeriesDTO seriesDTO) {
 		Series series = mapper.convertValue(seriesDTO, Series.class);
 		return seriesService.saveSeries(series).getId();
 	}
