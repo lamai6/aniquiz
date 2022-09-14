@@ -1,6 +1,6 @@
 package app.ganime.aniquiz.series;
 
-import app.ganime.aniquiz.config.exception.ResourceNotFoundException;
+import app.ganime.aniquiz.config.error.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

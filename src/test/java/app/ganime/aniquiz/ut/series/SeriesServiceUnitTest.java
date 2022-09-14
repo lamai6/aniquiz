@@ -1,6 +1,6 @@
 package app.ganime.aniquiz.ut.series;
 
-import app.ganime.aniquiz.config.exception.ResourceNotFoundException;
+import app.ganime.aniquiz.config.error.exception.ResourceNotFoundException;
 import app.ganime.aniquiz.series.Series;
 import app.ganime.aniquiz.series.SeriesRepository;
 import app.ganime.aniquiz.series.SeriesService;

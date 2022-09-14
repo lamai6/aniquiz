@@ -1,5 +1,6 @@
-package app.ganime.aniquiz.config.exception;
+package app.ganime.aniquiz.config.error;
 
+import app.ganime.aniquiz.config.error.exception.ResourceNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

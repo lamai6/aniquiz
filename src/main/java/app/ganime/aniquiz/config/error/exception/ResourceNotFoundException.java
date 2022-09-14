@@ -1,4 +1,4 @@
-package app.ganime.aniquiz.config.exception;
+package app.ganime.aniquiz.config.error.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
