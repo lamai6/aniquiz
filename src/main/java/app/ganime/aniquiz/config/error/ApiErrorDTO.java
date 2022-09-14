@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -31,10 +32,29 @@ public class ApiErrorDTO {
 			.build();
 
 		return Map.of("apiVersion", apiVersion, "error", errorBlock);
-//		return ApiErrorDTO.builder()
-//			.apiVersion("1.0")
-//			.error(errorBlock)
-//			.build();
+	}
+
+	public static Map<String, Object> getMapFromExceptions(final String apiVersion,
+														   int code,
+														   String message,
+														   List<Exception> exceptions) {
+		List<Error> errors = exceptions.stream()
+			.map(e -> {
+				return Error.builder()
+					.domain(e.getStackTrace()[0].getFileName().split("\\.")[0])
+					.reason(e.getClass().getSimpleName())
+					.message(e.getMessage())
+					.build();
+			})
+			.collect(Collectors.toList());
+
+		ErrorBlock errorBlock = ErrorBlock.builder()
+			.code(code)
+			.message(message)
+			.errors(errors)
+			.build();
+
+		return Map.of("apiVersion", apiVersion, "error", errorBlock);
 	}
 
 	@Getter
