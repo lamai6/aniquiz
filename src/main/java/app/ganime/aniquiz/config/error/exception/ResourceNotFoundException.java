@@ -1,9 +1,9 @@
 package app.ganime.aniquiz.config.error.exception;
 
+import app.ganime.aniquiz.config.error.ApiException;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
-public class ResourceNotFoundException extends ResponseStatusException {
+public class ResourceNotFoundException extends ApiException {
 	private static final String MESSAGE = "The resource you requested is not found";
 
 	public ResourceNotFoundException() {
