@@ -3,7 +3,10 @@ package app.ganime.aniquiz.config.error;
 import app.ganime.aniquiz.config.error.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -26,5 +29,14 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 			ex.getStatus().getReasonPhrase(),
 			List.of(ex));
 		return handleExceptionInternal(ex, error, new HttpHeaders(), ex.getStatus(), request);
+	}
+
+	@Override
+	public ResponseEntity<Object> handleHttpMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex,
+																   HttpHeaders headers,
+																   HttpStatus status,
+																   WebRequest request) {
+		String body = "Acceptable MIME type: " + MediaType.APPLICATION_JSON_VALUE;
+		return handleExceptionInternal(ex, body, headers, status, request);
 	}
 }
