@@ -2,7 +2,6 @@ package app.ganime.aniquiz.it.series;
 
 import app.ganime.aniquiz.series.SeriesDTO;
 import app.ganime.aniquiz.it.HttpClient;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -10,7 +9,6 @@ import io.cucumber.java.en.When;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 
@@ -20,19 +18,24 @@ public class SeriesStepDefinitions {
 
 	@Autowired
 	private HttpClient httpClient;
-	@Autowired
-	private ObjectMapper mapper;
 
 	private String name;
+	private String author;
 	private LocalDate releaseDate;
-	private JSONObject postBody;
+	private int newSeriesId;
 	private final String SERIES_URI = "series";
 	private final String SERIES_NAME_JSON_KEY = "name";
+	private final String SERIES_AUTHOR_JSON_KEY = "author";
 	private final String SERIES_RELEASE_DATE_JSON_KEY = "release_date";
 
 	@Given("the series name is {string}")
 	public void the_series_is(String name) {
 		this.name = name;
+	}
+
+	@And("its author is {string}")
+	public void the_series_author_is(String author) {
+		this.author = author;
 	}
 
 	@And("its release date is {int}-{int}-{int}")
@@ -44,16 +47,15 @@ public class SeriesStepDefinitions {
 	public void the_user_sends_the_series() throws JSONException {
 		JSONObject series = new JSONObject();
 		series.put(SERIES_NAME_JSON_KEY, name);
+		series.put(SERIES_AUTHOR_JSON_KEY, author);
 		series.put(SERIES_RELEASE_DATE_JSON_KEY, releaseDate);
 
-		ResponseEntity<String> response = this.httpClient.post(SERIES_URI, series.toString(), String.class);
-		this.postBody = new JSONObject(response.getBody());
+		this.newSeriesId = (int) this.httpClient.post(SERIES_URI, series.toString(), Integer.class).getBody();
 	}
 
 	@Then("the series is added")
 	public void the_series_is_added() throws JSONException {
-		int resourceId = this.postBody.getInt("id");
-		SeriesDTO series = (SeriesDTO) this.httpClient.get(SERIES_URI, resourceId, SeriesDTO.class).getBody();
+		SeriesDTO series = (SeriesDTO) this.httpClient.get(SERIES_URI, newSeriesId, SeriesDTO.class).getBody();
 
 		assertThat(series.getName()).isEqualTo(this.name);
 		assertThat(series.getReleaseDate()).isEqualTo(this.releaseDate);
