@@ -4,7 +4,6 @@ import app.ganime.aniquiz.series.Series;
 import app.ganime.aniquiz.series.SeriesController;
 import app.ganime.aniquiz.series.SeriesDTO;
 import app.ganime.aniquiz.series.SeriesService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,7 +42,7 @@ public class SeriesControllerUnitTest {
 	private List<Series> seriesList;
 
 	@Mock
-	private ObjectMapper mapper;
+	private ModelMapper mapper;
 	@Mock
 	private SeriesService seriesService;
 	@InjectMocks
@@ -67,7 +67,7 @@ public class SeriesControllerUnitTest {
 			.releaseDate(series.getReleaseDate())
 			.build();
 		given(seriesService.getSeries(2L)).willReturn(series);
-		given(mapper.convertValue(any(Series.class), eq(SeriesDTO.class))).willReturn(seriesDTO);
+		given(mapper.map(any(Series.class), eq(SeriesDTO.class))).willReturn(seriesDTO);
 
 		MockHttpServletResponse response = mvc.perform(get("/series/2").accept(MediaType.APPLICATION_JSON))
 			.andReturn()
@@ -101,7 +101,7 @@ public class SeriesControllerUnitTest {
 			.releaseDate(LocalDate.of(1998, 3, 16))
 			.build();
 		Series series = new Series(4L, userSeries.getName(), userSeries.getAuthor(), userSeries.getReleaseDate());
-		given(mapper.convertValue(any(SeriesDTO.class), eq(Series.class))).willReturn(series);
+		given(mapper.map(any(SeriesDTO.class), eq(Series.class))).willReturn(series);
 		given(seriesService.saveSeries(any(Series.class))).will(returnsFirstArg());
 
 		MockHttpServletResponse response = mvc.perform(post("/series")
