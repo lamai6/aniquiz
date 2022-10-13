@@ -1,6 +1,5 @@
 package app.ganime.aniquiz.config.error;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -60,7 +59,7 @@ public class ApiErrorDTO {
 	@Getter
 	@Setter
 	@Builder
-	private static final class ErrorBlock {
+	public static final class ErrorBlock {
 		private final int code;
 		private final String message;
 		private final List<Error> errors;
@@ -69,7 +68,7 @@ public class ApiErrorDTO {
 	@Getter
 	@Setter
 	@Builder
-	private static final class Error {
+	public static final class Error {
 		private final String domain;
 		private final String reason;
 		private final String message;
