@@ -45,12 +45,12 @@ public class ContributorServiceUnitTest {
 
 		List<Contributor> contributors = service.getContributors();
 
-		assertThat(contributors.size()).isEqualTo(3);
+		assertThat(contributors.size()).isEqualTo(2);
 	}
 
 	@Test
 	public void shouldGetContributorById() {
-		final Long CONTRIBUTOR_ID = 2L;
+		final Long CONTRIBUTOR_ID = 1L;
 		given(repository.findById(anyLong())).willReturn(contributorList.stream().filter(c -> c.getId() == CONTRIBUTOR_ID).findFirst());
 
 		Contributor contributor = service.getContributor(CONTRIBUTOR_ID);
