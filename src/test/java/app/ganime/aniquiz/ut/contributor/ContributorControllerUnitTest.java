@@ -79,6 +79,14 @@ public class ContributorControllerUnitTest {
 	@Test
 	public void shouldRetrieveAllContributors() throws Exception {
 		given(service.getContributors()).willReturn(this.contributorList);
+		given(mapper.map(any(Contributor.class), eq(ContributorDTO.class))).willAnswer((invocation) -> {
+			Contributor currContributor = invocation.getArgument(0);
+			ContributorDTO dto = ContributorDTO.builder()
+				.username(currContributor.getUsername())
+				.email(currContributor.getEmail())
+				.build();
+			return dto;
+		});
 
 		MockHttpServletResponse response = mvc.perform(get("/contributors").accept(MediaType.APPLICATION_JSON))
 			.andReturn()
@@ -88,9 +96,10 @@ public class ContributorControllerUnitTest {
 		JSONObject firstContributor = body.getJSONObject(0);
 		Contributor contributor = this.contributorList.stream().filter(c -> c.getId() == 1L).findFirst().orElse(null);
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-		assertThat(body.length()).isEqualTo(3);
+		assertThat(body.length()).isEqualTo(2);
 		assertThat(firstContributor.getString("username")).isEqualTo(contributor.getUsername());
 		assertThat(firstContributor.getString("email")).isEqualTo(contributor.getEmail());
+		assertThat(firstContributor.getString("password")).isEqualTo("null");
 	}
 
 	@Test
@@ -113,7 +122,7 @@ public class ContributorControllerUnitTest {
 				.content(json.write(contributorDTO).getJson()))
 			.andReturn()
 			.getResponse();
-		
+
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED.value());
 		assertThat(response.getContentAsString()).isEqualTo("3");
 	}

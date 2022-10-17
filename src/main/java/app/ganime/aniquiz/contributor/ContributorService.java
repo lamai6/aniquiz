@@ -11,4 +11,8 @@ public class ContributorService {
 	public List<Contributor> getContributors() {
 		return null;
 	}
+
+	public Contributor saveContributor(Contributor contributor) {
+		return null;
+	}
 }
