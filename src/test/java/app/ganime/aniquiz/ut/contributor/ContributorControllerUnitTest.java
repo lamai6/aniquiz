@@ -26,16 +26,19 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @ExtendWith(MockitoExtension.class)
 public class ContributorControllerUnitTest {
 
 	private MockMvc mvc;
 	private List<Contributor> contributorList;
+	private JacksonTester json;
 	@Mock
 	private ContributorService service;
 	@Mock
@@ -88,5 +91,30 @@ public class ContributorControllerUnitTest {
 		assertThat(body.length()).isEqualTo(3);
 		assertThat(firstContributor.getString("username")).isEqualTo(contributor.getUsername());
 		assertThat(firstContributor.getString("email")).isEqualTo(contributor.getEmail());
+	}
+
+	@Test
+	public void shouldAddNewContributor() throws Exception {
+		ContributorDTO contributorDTO = ContributorDTO.builder()
+			.username("")
+			.email("")
+			.password("")
+			.build();
+		Contributor contributor = new Contributor(
+			3L,
+			contributorDTO.getUsername(),
+			contributorDTO.getEmail(),
+			contributorDTO.getPassword());
+		given(mapper.map(any(ContributorDTO.class), eq(Contributor.class))).willReturn(contributor);
+		given(service.saveContributor(any(Contributor.class))).will(returnsFirstArg());
+
+		MockHttpServletResponse response = mvc.perform(post("/contributors")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(json.write(contributorDTO).getJson()))
+			.andReturn()
+			.getResponse();
+		
+		assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED.value());
+		assertThat(response.getContentAsString()).isEqualTo("3");
 	}
 }
