@@ -16,11 +16,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class SeriesServiceUnitTest {
@@ -81,8 +81,8 @@ public class SeriesServiceUnitTest {
 
 		Series seriesSaved = seriesService.saveSeries(series);
 
-		assertThat(series.getName()).isEqualTo("Hunter x Hunter");
-		assertThat(series.getAuthor()).isEqualTo("Yoshihiro Togashi");
-		assertThat(series.getReleaseDate()).isEqualTo(LocalDate.of(1998, 3, 16));
+		assertThat(seriesSaved.getName()).isEqualTo(series.getName());
+		assertThat(seriesSaved.getAuthor()).isEqualTo(series.getAuthor());
+		assertThat(seriesSaved.getReleaseDate()).isEqualTo(series.getReleaseDate());
 	}
 }
