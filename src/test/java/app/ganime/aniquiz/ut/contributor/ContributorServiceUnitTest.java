@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,8 +35,8 @@ public class ContributorServiceUnitTest {
 	@BeforeEach
 	private void setup() {
 		contributorList = Stream.of(
-				new Contributor(1L, "akagami", "shanks92@gmail.com", "@kagami92"),
-				new Contributor(2L, "kurosaki", "ichigo95@outlook.com", "bankai"))
+				new Contributor(1L, "akagami", "shanks92@gmail.com", "@kagami92", LocalDateTime.now()),
+				new Contributor(2L, "kurosaki", "ichigo95@outlook.com", "bankai", LocalDateTime.now()))
 			.collect(Collectors.toList());
 	}
 
@@ -72,12 +73,13 @@ public class ContributorServiceUnitTest {
 
 	@Test
 	public void shouldSaveContributorRegistration() {
-		Contributor contributor = new Contributor(3L, "roronoa95", "roronoa95@gmail.com", "onepiece");
+		Contributor contributor = new Contributor(3L, "roronoa95", "roronoa95@gmail.com", "onepiece", LocalDateTime.now());
 		given(repository.save(any(Contributor.class))).will(returnsFirstArg());
 
 		Contributor contributorSaved = service.saveContributor(contributor);
 
 		assertThat(contributorSaved.getUsername()).isEqualTo(contributor.getUsername());
 		assertThat(contributorSaved.getEmail()).isEqualTo(contributor.getEmail());
+		assertThat(contributorSaved.getCreatedAt()).isEqualTo(contributor.getCreatedAt());
 	}
 }

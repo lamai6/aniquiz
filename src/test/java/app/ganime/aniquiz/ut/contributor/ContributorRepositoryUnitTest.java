@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.TestPropertySource;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,8 +33,8 @@ public class ContributorRepositoryUnitTest {
 	@BeforeAll
 	public static void initData() {
 		contributorDB = Stream.of(
-				new Contributor(1L, "akagami", "shanks92@gmail.com", "@kagami92"),
-				new Contributor(2L, "kurosaki", "ichigo95@outlook.com", "bankai"))
+				new Contributor(1L, "akagami", "shanks92@gmail.com", "@kagami92", LocalDateTime.now()),
+				new Contributor(2L, "kurosaki", "ichigo95@outlook.com", "bankai", LocalDateTime.now()))
 			.collect(Collectors.toList());
 	}
 
@@ -67,13 +68,14 @@ public class ContributorRepositoryUnitTest {
 
 	@Test
 	public void should_add_series() {
-		Contributor contributor = new Contributor(3L, "roronoa95", "roronoa95@gmail.com", "onepiece");
+		Contributor contributor = new Contributor(3L, "roronoa95", "roronoa95@gmail.com", "onepiece", LocalDateTime.now());
 
 		Contributor contributorSaved = repository.save(contributor);
 
 		assertThat(repository.findAll().size()).isEqualTo(3);
 		assertThat(contributorSaved.getUsername()).isEqualTo(contributor.getUsername());
 		assertThat(contributorSaved.getEmail()).isEqualTo(contributor.getEmail());
-		assertThat(contributor.getPassword()).isEqualTo(contributor.getPassword());
+		assertThat(contributorSaved.getPassword()).isEqualTo(contributor.getPassword());
+		assertThat(contributorSaved.getCreatedAt()).isEqualTo(contributor.getCreatedAt());
 	}
 }

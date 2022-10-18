@@ -5,6 +5,7 @@ import app.ganime.aniquiz.contributor.ContributorController;
 import app.ganime.aniquiz.contributor.ContributorDTO;
 import app.ganime.aniquiz.contributor.ContributorService;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,6 +35,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 public class ContributorControllerUnitTest {
 
@@ -51,8 +54,8 @@ public class ContributorControllerUnitTest {
 		JacksonTester.initFields(this, JsonMapper.builder().findAndAddModules().build());
 		mvc = MockMvcBuilders.standaloneSetup(controller).build();
 		contributorList = Stream.of(
-				new Contributor(1L, "akagami", "shanks92@gmail.com", "@kagami92"),
-				new Contributor(2L, "kurosaki", "ichigo95@outlook.com", "bankai"))
+				new Contributor(1L, "akagami", "shanks92@gmail.com", "@kagami92", LocalDateTime.now()),
+				new Contributor(2L, "kurosaki", "ichigo95@outlook.com", "bankai", LocalDateTime.now()))
 			.collect(Collectors.toList());
 	}
 
@@ -62,6 +65,7 @@ public class ContributorControllerUnitTest {
 		ContributorDTO contributorDTO = ContributorDTO.builder()
 			.username(contributor.getUsername())
 			.email(contributor.getEmail())
+			.createdAt(contributor.getCreatedAt())
 			.build();
 		given(service.getContributor(1L)).willReturn(contributor);
 		given(mapper.map(any(Contributor.class), eq(ContributorDTO.class))).willReturn(contributorDTO);
@@ -71,9 +75,11 @@ public class ContributorControllerUnitTest {
 			.getResponse();
 
 		JSONObject body = new JSONObject(response.getContentAsString());
+		log.info(body.toString());
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 		assertThat(body.getString("username")).isEqualTo(contributor.getUsername());
 		assertThat(body.getString("email")).isEqualTo(contributor.getEmail());
+		assertThat(LocalDateTime.parse(body.getString("created_at"))).isEqualTo(contributor.getCreatedAt());
 	}
 
 	@Test
@@ -84,6 +90,7 @@ public class ContributorControllerUnitTest {
 			ContributorDTO dto = ContributorDTO.builder()
 				.username(currContributor.getUsername())
 				.email(currContributor.getEmail())
+				.createdAt(currContributor.getCreatedAt())
 				.build();
 			return dto;
 		});
@@ -100,6 +107,7 @@ public class ContributorControllerUnitTest {
 		assertThat(firstContributor.getString("username")).isEqualTo(contributor.getUsername());
 		assertThat(firstContributor.getString("email")).isEqualTo(contributor.getEmail());
 		assertThat(firstContributor.getString("password")).isEqualTo("null");
+		assertThat(LocalDateTime.parse(firstContributor.getString("created_at"))).isEqualTo(contributor.getCreatedAt());
 	}
 
 	@Test
@@ -113,7 +121,8 @@ public class ContributorControllerUnitTest {
 			3L,
 			contributorDTO.getUsername(),
 			contributorDTO.getEmail(),
-			contributorDTO.getPassword());
+			contributorDTO.getPassword(),
+			contributorDTO.getCreatedAt());
 		given(mapper.map(any(ContributorDTO.class), eq(Contributor.class))).willReturn(contributor);
 		given(service.saveContributor(any(Contributor.class))).will(returnsFirstArg());
 
