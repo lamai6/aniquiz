@@ -4,6 +4,7 @@ import app.ganime.aniquiz.config.error.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -21,6 +22,7 @@ public class ContributorService {
 	}
 
 	public Contributor saveContributor(Contributor contributor) {
+		contributor.setCreatedAt(LocalDateTime.now());
 		return repository.save(contributor);
 	}
 }
