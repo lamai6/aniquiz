@@ -5,7 +5,6 @@ import app.ganime.aniquiz.contributor.ContributorController;
 import app.ganime.aniquiz.contributor.ContributorDTO;
 import app.ganime.aniquiz.contributor.ContributorService;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +34,6 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-@Slf4j
 @ExtendWith(MockitoExtension.class)
 public class ContributorControllerUnitTest {
 
@@ -75,7 +73,6 @@ public class ContributorControllerUnitTest {
 			.getResponse();
 
 		JSONObject body = new JSONObject(response.getContentAsString());
-		log.info(body.toString());
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
 		assertThat(body.getString("username")).isEqualTo(contributor.getUsername());
 		assertThat(body.getString("email")).isEqualTo(contributor.getEmail());
@@ -113,9 +110,10 @@ public class ContributorControllerUnitTest {
 	@Test
 	public void shouldAddNewContributor() throws Exception {
 		ContributorDTO contributorDTO = ContributorDTO.builder()
-			.username("")
-			.email("")
-			.password("")
+			.username("roronoa95")
+			.email("roronoa95@gmail.com")
+			.password("onepiece")
+			.createdAt(LocalDateTime.now())
 			.build();
 		Contributor contributor = new Contributor(
 			3L,
