@@ -1,20 +1,21 @@
 package app.ganime.aniquiz.config.error;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class ApiErrorDTO {
 
-	private final String apiVersion;
-	private final ErrorBlock error;
+	private String apiVersion;
+	private ErrorBlock error;
 
 	public static Map<String, Object> getMapFromDefaultAttributeMap(final String apiVersion,
 													  final Map<String, Object> defaultErrorAttributes) {
@@ -33,20 +34,10 @@ public class ApiErrorDTO {
 		return Map.of("apiVersion", apiVersion, "error", errorBlock);
 	}
 
-	public static Map<String, Object> getMapFromExceptions(final String apiVersion,
+	public static Map<String, Object> getMapFromErrors(final String apiVersion,
 														   int code,
 														   String message,
-														   List<Exception> exceptions) {
-		List<Error> errors = exceptions.stream()
-			.map(e -> {
-				return Error.builder()
-					.domain(e.getStackTrace()[0].getFileName().split("\\.")[0])
-					.reason(e.getClass().getSimpleName())
-					.message(e.getMessage())
-					.build();
-			})
-			.collect(Collectors.toList());
-
+														   List<Error> errors) {
 		ErrorBlock errorBlock = ErrorBlock.builder()
 			.code(code)
 			.message(message)
@@ -59,18 +50,30 @@ public class ApiErrorDTO {
 	@Getter
 	@Setter
 	@Builder
-	public static final class ErrorBlock {
-		private final int code;
-		private final String message;
-		private final List<Error> errors;
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@ToString
+	public static class ErrorBlock {
+		@JsonProperty("code")
+		private int code;
+		@JsonProperty("message")
+		private String message;
+		@JsonProperty("errors")
+		private List<Error> errors;
 	}
 
 	@Getter
 	@Setter
 	@Builder
-	public static final class Error {
-		private final String domain;
-		private final String reason;
-		private final String message;
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@ToString
+	public static class Error {
+		@JsonProperty("domain")
+		private String domain;
+		@JsonProperty("reason")
+		private String reason;
+		@JsonProperty("message")
+		private String message;
 	}
 }

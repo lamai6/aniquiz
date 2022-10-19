@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ public class ContributorController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public Long postContributor(@RequestBody ContributorDTO contributorDTO) {
+	public Long postContributor(@Valid @RequestBody ContributorDTO contributorDTO) {
 		Contributor contributor = mapper.map(contributorDTO, Contributor.class);
 		return service.saveContributor(contributor).getId();
 	}
