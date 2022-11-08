@@ -14,6 +14,7 @@ public class Proposition {
 	@JsonIgnore
 	private Long id;
 	private String name;
+	private boolean isCorrect;
 	@JsonBackReference
 	private Title title;
 }
