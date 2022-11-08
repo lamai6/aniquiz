@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `aniquiz`.`question` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `type` VARCHAR(5) NOT NULL,
   `difficulty` VARCHAR(3) NOT NULL,
-  `creation_date` DATETIME NOT NULL,
+  `created_at` DATETIME NULL,
   `author_id` INT NOT NULL,
   `series_id` INT NOT NULL,
   PRIMARY KEY (`id`),
@@ -111,10 +111,13 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `aniquiz`.`proposition` ;
 
 CREATE TABLE IF NOT EXISTS `aniquiz`.`proposition` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NOT NULL,
+  `is_correct` TINYINT(1) NOT NULL,
   `title_question_id` INT NOT NULL,
   `title_locale_id` INT NOT NULL,
-  `name` VARCHAR(100) NOT NULL,
-  PRIMARY KEY (`title_question_id`, `title_locale_id`),
+  PRIMARY KEY (`id`),
+  INDEX `fk_proposition_title1_idx` (`title_question_id` ASC, `title_locale_id` ASC) VISIBLE,
   CONSTRAINT `fk_proposition_title1`
     FOREIGN KEY (`title_question_id` , `title_locale_id`)
     REFERENCES `aniquiz`.`title` (`question_id` , `locale_id`)
