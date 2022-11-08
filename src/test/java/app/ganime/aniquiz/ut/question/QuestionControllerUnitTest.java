@@ -12,7 +12,6 @@ import app.ganime.aniquiz.title.Title;
 import app.ganime.aniquiz.title.TitleDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,13 +38,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-@Slf4j
 @ExtendWith(MockitoExtension.class)
 public class QuestionControllerUnitTest {
 
 	private MockMvc mvc;
 	private ObjectMapper mapper;
-//	private JacksonTester json;
 	private List<Question> questionList;
 
 	@Mock
@@ -63,7 +60,6 @@ public class QuestionControllerUnitTest {
 	public void setup() {
 		this.mapper = JsonMapper.builder().findAndAddModules().build();
 		JacksonTester.initFields(this, mapper);
-//		this.mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 		mvc = MockMvcBuilders.standaloneSetup(controller).build();
 
 		Question question = new Question(1L, Type.SCQ, Difficulty.E, LocalDateTime.now(), null, null, null);
@@ -96,8 +92,8 @@ public class QuestionControllerUnitTest {
 
 		JSONObject body = new JSONObject(response.getContentAsString());
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-		assertThat(body.getString("type")).isEqualTo(Type.SCQ.toString());
-		assertThat(body.getString("difficulty")).isEqualTo(Difficulty.E.toString());
+		assertThat(body.getString("type")).isEqualTo(Type.SCQ.getDescription());
+		assertThat(body.getString("difficulty")).isEqualTo(Difficulty.E.getDescription());
 		assertThat(LocalDateTime.parse(body.getString("created_at"))).isEqualTo(question.getCreatedAt());
 	}
 
