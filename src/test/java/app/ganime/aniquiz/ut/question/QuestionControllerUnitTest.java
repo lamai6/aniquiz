@@ -1,7 +1,9 @@
 package app.ganime.aniquiz.ut.question;
 
 import app.ganime.aniquiz.language.Language;
+import app.ganime.aniquiz.language.LanguageDTO;
 import app.ganime.aniquiz.proposition.Proposition;
+import app.ganime.aniquiz.proposition.PropositionDTO;
 import app.ganime.aniquiz.question.Difficulty.Difficulty;
 import app.ganime.aniquiz.question.Question;
 import app.ganime.aniquiz.question.QuestionController;
@@ -12,6 +14,7 @@ import app.ganime.aniquiz.title.Title;
 import app.ganime.aniquiz.title.TitleDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,18 +36,20 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @ExtendWith(MockitoExtension.class)
 public class QuestionControllerUnitTest {
 
 	private MockMvc mvc;
 	private ObjectMapper mapper;
+	private JacksonTester json;
 	private List<Question> questionList;
-
 	@Mock
 	private QuestionService service;
 	@Mock
@@ -64,7 +69,7 @@ public class QuestionControllerUnitTest {
 
 		Question question = new Question(1L, Type.SCQ, Difficulty.E, LocalDateTime.now(), null, null, null);
 		Language en = new Language(1L, Locale.ENGLISH, null);
-		Title title = new Title(question, en, "What is the devil fruit of Monkey D. Luffy ?", null);
+		Title title = new Title(question, en, "What is the devil fruit of Monkey D. Luffy?", null);
 		Proposition proposition1 = new Proposition(1L, "Gomu Gomu no Mi", true, title);
 		Proposition proposition2 = new Proposition(2L, "Mera Mera no Mi", false, title);
 
@@ -95,6 +100,70 @@ public class QuestionControllerUnitTest {
 		assertThat(body.getString("type")).isEqualTo(Type.SCQ.getDescription());
 		assertThat(body.getString("difficulty")).isEqualTo(Difficulty.E.getDescription());
 		assertThat(LocalDateTime.parse(body.getString("created_at"))).isEqualTo(question.getCreatedAt());
+		assertThat(new JSONArray(body.getString("titles")).length()).isEqualTo(1);
+	}
+
+	@Test
+	public void shouldRetrieveAllQuestions() throws Exception {
+		given(service.getQuestions()).willReturn(this.questionList);
+		given(modelMapper.map(any(Question.class), eq(QuestionDTO.class))).willAnswer((invocation) -> {
+			Question currQuestion = invocation.getArgument(0);
+			QuestionDTO dto = QuestionDTO.builder()
+				.type(currQuestion.getType())
+				.difficulty(currQuestion.getDifficulty())
+				.createdAt(currQuestion.getCreatedAt())
+				.titles(currQuestion.getTitles().stream().map(t -> mapper.convertValue(t, TitleDto.class)).collect(Collectors.toList()))
+				.build();
+			return dto;
+		});
+
+		MockHttpServletResponse response = mvc.perform(get("/questions").accept(MediaType.APPLICATION_JSON))
+			.andReturn()
+			.getResponse();
+
+		JSONArray body = new JSONArray(response.getContentAsString());
+		QuestionDTO questionDTO = mapper.readValue(body.getString(0), QuestionDTO.class);
+		Question question = this.questionList.stream().filter(c -> c.getId() == 1L).findFirst().orElse(null);
+		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+		assertThat(body.length()).isEqualTo(1);
+		assertThat(questionDTO.getType()).isEqualTo(question.getType());
+		assertThat(questionDTO.getDifficulty()).isEqualTo(question.getDifficulty());
+		assertThat(questionDTO.getCreatedAt()).isEqualTo(question.getCreatedAt());
+		assertThat(questionDTO.getTitles().size()).isEqualTo(1);
+	}
+
+	@Test
+	public void shouldAddNewQuestion() throws Exception {
+		PropositionDTO prop1 = PropositionDTO.builder().name("Zoro").isCorrect(true).build();
+		PropositionDTO prop2 = PropositionDTO.builder().name("Shanks").isCorrect(false).build();
+		PropositionDTO prop3 = PropositionDTO.builder().name("Brook").isCorrect(true).build();
+		LanguageDTO en = new LanguageDTO(Locale.ENGLISH);
+		TitleDto title = new TitleDto("Which of these characters are part of Luffy's crew?", en, List.of(prop1, prop2,prop3));
+		QuestionDTO questionDTO = QuestionDTO.builder()
+			.type(Type.MCQ)
+			.difficulty(Difficulty.E)
+			.createdAt(LocalDateTime.now())
+			.titles(List.of(title))
+			.build();
+		Question question = new Question(
+			2L,
+			questionDTO.getType(),
+			questionDTO.getDifficulty(),
+			questionDTO.getCreatedAt(),
+			null,
+			null,
+			questionDTO.getTitles().stream().map(t -> mapper.convertValue(t, Title.class)).collect(Collectors.toList()));
+		given(modelMapper.map(any(QuestionDTO.class), eq(Question.class))).willReturn(question);
+		given(service.saveQuestion(any(Question.class))).will(returnsFirstArg());
+
+		MockHttpServletResponse response = mvc.perform(post("/questions")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(json.write(questionDTO).getJson()))
+			.andReturn()
+			.getResponse();
+
+		assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED.value());
+		assertThat(response.getContentAsString()).isEqualTo("2");
 	}
 
 }
