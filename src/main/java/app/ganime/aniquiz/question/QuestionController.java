@@ -2,10 +2,11 @@ package app.ganime.aniquiz.question;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/questions")
@@ -15,6 +16,21 @@ public class QuestionController {
 	private QuestionService service;
 	@Autowired
 	private ModelMapper mapper;
+
+	@GetMapping
+	public List<QuestionDTO> getQuestions() {
+		return service.getQuestions()
+			.stream()
+			.map(q -> mapper.map(q, QuestionDTO.class))
+			.collect(Collectors.toList());
+	}
+
+	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
+	public Long postQuestions(@RequestBody QuestionDTO questionDTO) {
+		Question question = mapper.map(questionDTO, Question.class);
+		return service.saveQuestion(question).getId();
+	}
 
 	@GetMapping("/{id}")
 	public QuestionDTO getQuestion(@PathVariable("id") Long id) {
