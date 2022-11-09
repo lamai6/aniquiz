@@ -15,11 +15,11 @@ import java.util.List;
 @Getter
 @Setter
 public class Title {
-	@JsonBackReference
+	@JsonBackReference("question-title")
 	private Question question;
-	@JsonBackReference
+	@JsonBackReference("language-title")
 	private Language language;
 	private String name;
-	@JsonManagedReference
+	@JsonManagedReference("title-proposition")
 	private List<Proposition> propositions;
 }

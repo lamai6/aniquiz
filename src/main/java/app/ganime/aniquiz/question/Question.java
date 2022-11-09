@@ -23,6 +23,6 @@ public class Question {
 	private LocalDateTime createdAt;
 	private Series series;
 	private Contributor contributor;
-	@JsonManagedReference
+	@JsonManagedReference("question-title")
 	private List<Title> titles;
 }

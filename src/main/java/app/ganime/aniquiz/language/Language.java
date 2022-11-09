@@ -15,6 +15,6 @@ import java.util.Locale;
 public class Language {
 	private Long id;
 	private Locale locale;
-	@JsonManagedReference
+	@JsonManagedReference("language-title")
 	private List<Title> titles;
 }

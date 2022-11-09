@@ -15,6 +15,6 @@ public class Proposition {
 	private Long id;
 	private String name;
 	private boolean isCorrect;
-	@JsonBackReference
+	@JsonBackReference("title-proposition")
 	private Title title;
 }
