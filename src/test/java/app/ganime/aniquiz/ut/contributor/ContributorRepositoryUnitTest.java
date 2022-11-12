@@ -67,7 +67,7 @@ public class ContributorRepositoryUnitTest {
 	}
 
 	@Test
-	public void should_add_series() {
+	public void shouldAddContributor() {
 		Contributor contributor = new Contributor(3L, "roronoa95", "roronoa95@gmail.com", "onepiece", LocalDateTime.now());
 
 		Contributor contributorSaved = repository.save(contributor);

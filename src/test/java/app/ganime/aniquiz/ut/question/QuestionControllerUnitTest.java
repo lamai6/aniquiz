@@ -69,7 +69,7 @@ public class QuestionControllerUnitTest {
 
 		Question question = new Question(1L, Type.SCQ, Difficulty.E, LocalDateTime.now(), null, null, null);
 		Language en = new Language(1L, Locale.ENGLISH, null);
-		Title title = new Title(question, en, "What is the devil fruit of Monkey D. Luffy?", null);
+		Title title = new Title(null, "What is the devil fruit of Monkey D. Luffy?", question, en, null);
 		Proposition proposition1 = new Proposition(1L, "Gomu Gomu no Mi", true, title);
 		Proposition proposition2 = new Proposition(2L, "Mera Mera no Mi", false, title);
 

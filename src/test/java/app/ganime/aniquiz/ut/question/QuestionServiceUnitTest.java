@@ -41,7 +41,7 @@ public class QuestionServiceUnitTest {
 	private void setup() {
 		Question question = new Question(1L, Type.SCQ, Difficulty.E, LocalDateTime.now(), null, null, null);
 		Language en = new Language(1L, Locale.ENGLISH, null);
-		Title title = new Title(question, en, "What is the devil fruit of Monkey D. Luffy?", null);
+		Title title = new Title(null, "What is the devil fruit of Monkey D. Luffy?", question, en, null);
 		Proposition proposition1 = new Proposition(1L, "Gomu Gomu no Mi", true, title);
 		Proposition proposition2 = new Proposition(2L, "Mera Mera no Mi", false, title);
 
@@ -89,8 +89,9 @@ public class QuestionServiceUnitTest {
 		Proposition prop2 = new Proposition(4L, "Shanks", false, null);
 		Proposition prop3 = new Proposition(5L, "Brook", true, null);
 		Language en = new Language(1L, Locale.ENGLISH, null);
-		Title title = new Title(null, en, "Which of these characters are part of Luffy's crew?", List.of(prop1, prop2, prop3));
-		Question question = new Question(2L, Type.MCQ, Difficulty.E, LocalDateTime.now(), null, null, List.of(title));
+		Question question = new Question(2L, Type.MCQ, Difficulty.E, LocalDateTime.now(), null, null, null);
+		Title title = new Title(null, "Which of these characters are part of Luffy's crew?", question, en, List.of(prop1, prop2, prop3));
+		question.setTitles(List.of(title));
 		given(repository.save(any(Question.class))).will(returnsFirstArg());
 
 		Question questionSaved = service.saveQuestion(question);
