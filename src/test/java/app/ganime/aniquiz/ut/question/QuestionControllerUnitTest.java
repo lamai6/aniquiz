@@ -11,7 +11,7 @@ import app.ganime.aniquiz.question.QuestionDTO;
 import app.ganime.aniquiz.question.QuestionService;
 import app.ganime.aniquiz.question.Type.Type;
 import app.ganime.aniquiz.title.Title;
-import app.ganime.aniquiz.title.TitleDto;
+import app.ganime.aniquiz.title.TitleDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.json.JSONArray;
@@ -86,7 +86,7 @@ public class QuestionControllerUnitTest {
 			.type(question.getType())
 			.difficulty(question.getDifficulty())
 			.createdAt(question.getCreatedAt())
-			.titles(question.getTitles().stream().map(t -> mapper.convertValue(t, TitleDto.class)).collect(Collectors.toList()))
+			.titles(question.getTitles().stream().map(t -> mapper.convertValue(t, TitleDTO.class)).collect(Collectors.toList()))
 			.build();
 		given(service.getQuestion(1L)).willReturn(question);
 		given(modelMapper.map(any(Question.class), eq(QuestionDTO.class))).willReturn(questionDTO);
@@ -112,7 +112,7 @@ public class QuestionControllerUnitTest {
 				.type(currQuestion.getType())
 				.difficulty(currQuestion.getDifficulty())
 				.createdAt(currQuestion.getCreatedAt())
-				.titles(currQuestion.getTitles().stream().map(t -> mapper.convertValue(t, TitleDto.class)).collect(Collectors.toList()))
+				.titles(currQuestion.getTitles().stream().map(t -> mapper.convertValue(t, TitleDTO.class)).collect(Collectors.toList()))
 				.build();
 			return dto;
 		});
@@ -138,7 +138,7 @@ public class QuestionControllerUnitTest {
 		PropositionDTO prop2 = PropositionDTO.builder().name("Shanks").isCorrect(false).build();
 		PropositionDTO prop3 = PropositionDTO.builder().name("Brook").isCorrect(true).build();
 		LanguageDTO en = new LanguageDTO(Locale.ENGLISH);
-		TitleDto title = new TitleDto("Which of these characters are part of Luffy's crew?", en, List.of(prop1, prop2,prop3));
+		TitleDTO title = new TitleDTO("Which of these characters are part of Luffy's crew?", en, List.of(prop1, prop2,prop3));
 		QuestionDTO questionDTO = QuestionDTO.builder()
 			.type(Type.MCQ)
 			.difficulty(Difficulty.E)

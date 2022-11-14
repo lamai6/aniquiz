@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TitleDto {
+public class TitleDTO {
 	@JsonProperty("name")
 	private String name;
 	@JsonProperty("language")
