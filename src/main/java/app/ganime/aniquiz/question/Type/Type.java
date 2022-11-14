@@ -1,5 +1,6 @@
 package app.ganime.aniquiz.question.Type;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
@@ -14,5 +15,10 @@ public enum Type {
 
 	Type(String description) {
 		this.description = description;
+	}
+
+	@JsonCreator
+	public static Type getEnumFrom(String value) {
+		return Type.valueOf(value);
 	}
 }
