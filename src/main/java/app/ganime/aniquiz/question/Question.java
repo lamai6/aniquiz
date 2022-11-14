@@ -37,9 +37,11 @@ public class Question {
 	private LocalDateTime createdAt;
 
 	@ManyToOne
+	@JoinColumn(name = "series_id", referencedColumnName = "id")
 	private Series series;
 
 	@ManyToOne
+	@JoinColumn(name = "author_id", referencedColumnName = "id")
 	private Contributor contributor;
 
 	@OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
