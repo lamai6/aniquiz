@@ -10,5 +10,5 @@ import java.util.Locale;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LanguageDTO {
-	private Locale locale;
+	private Locale code;
 }
