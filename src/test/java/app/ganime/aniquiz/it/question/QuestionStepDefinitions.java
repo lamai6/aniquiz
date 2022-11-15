@@ -1,5 +1,6 @@
 package app.ganime.aniquiz.it.question;
 
+import app.ganime.aniquiz.config.error.ApiErrorDTO;
 import app.ganime.aniquiz.it.HttpClient;
 import app.ganime.aniquiz.proposition.PropositionDTO;
 import app.ganime.aniquiz.question.QuestionDTO;
@@ -50,8 +51,8 @@ public class QuestionStepDefinitions {
 			.build();
 	}
 
-	@Given("^I want to add a new easy single-choice question, as a contributor$")
-	public void i_want_to_add_a_new_easy_single_choice_question_as_a_contributor(List<Map<String, Object>> entry) throws JsonProcessingException {
+	@Given("^I want to add a question, as a contributor$")
+	public void i_want_to_add_a_question_as_a_contributor(List<Map<String, Object>> entry) throws JsonProcessingException {
 		this.question = entry.stream().findFirst().orElse(null);
 	}
 
@@ -82,5 +83,17 @@ public class QuestionStepDefinitions {
 		assertThat(questionAdded.getTitles().stream().findFirst().orElse(null).getName()).isEqualTo(this.question.get("title"));
 		assertThat(questionAdded.getTitles().stream().findFirst().orElse(null).getLanguage().getCode())
 			.isEqualTo(Locale.forLanguageTag((String) this.question.get("language")));
+	}
+
+	@Then("^the question is rejected$")
+	public void the_question_is_rejected() throws Exception {
+		final String ERROR_MSG = "The question has not been added due to an error";
+		final String INVALID_LOGIC_MCQ = "A multiple-choice question must have at least 2 correct propositions";
+		ApiErrorDTO errorDTO = mapper.readValue(this.responseBody, ApiErrorDTO.class);
+		ApiErrorDTO.Error error = errorDTO.getError().getErrors().stream().findFirst().orElse(null);
+
+		assertThat(errorDTO.getError().getCode()).isEqualTo(400);
+		assertThat(errorDTO.getError().getMessage()).isEqualTo(ERROR_MSG);
+		assertThat(error.getMessage()).isEqualTo(INVALID_LOGIC_MCQ);
 	}
 }
