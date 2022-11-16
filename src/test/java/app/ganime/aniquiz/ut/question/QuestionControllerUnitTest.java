@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -122,6 +123,11 @@ public class QuestionControllerUnitTest {
 			.getResponse();
 
 		JSONArray body = new JSONArray(response.getContentAsString());
+		JSONObject questionJSON = body.getJSONObject(0);
+		questionJSON.put("difficulty", questionJSON.get("difficulty").toString().substring(0, 1).toUpperCase());
+		questionJSON.put("type", Arrays.stream(questionJSON.get("type").toString().split(" "))
+			.map(w -> w.substring(0,1))
+			.collect(Collectors.joining()));
 		QuestionDTO questionDTO = mapper.readValue(body.getString(0), QuestionDTO.class);
 		Question question = this.questionList.stream().filter(c -> c.getId() == 1L).findFirst().orElse(null);
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
@@ -153,12 +159,17 @@ public class QuestionControllerUnitTest {
 			null,
 			null,
 			questionDTO.getTitles().stream().map(t -> mapper.convertValue(t, Title.class)).collect(Collectors.toList()));
+		JSONObject questionJSON = new JSONObject(mapper.writeValueAsString(questionDTO));
+		questionJSON.put("difficulty", questionJSON.get("difficulty").toString().substring(0, 1).toUpperCase());
+		questionJSON.put("type", Arrays.stream(questionJSON.get("type").toString().split(" "))
+			.map(w -> w.substring(0,1))
+			.collect(Collectors.joining()));
 		given(modelMapper.map(any(QuestionDTO.class), eq(Question.class))).willReturn(question);
 		given(service.saveQuestion(any(Question.class))).will(returnsFirstArg());
 
 		MockHttpServletResponse response = mvc.perform(post("/questions")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(json.write(questionDTO).getJson()))
+				.content(questionJSON.toString()))
 			.andReturn()
 			.getResponse();
 
