@@ -27,9 +27,11 @@ public class Question {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "type")
 	private Type type;
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "difficulty")
 	private Difficulty difficulty;
 
