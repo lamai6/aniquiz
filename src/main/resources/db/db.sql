@@ -11,22 +11,6 @@ CREATE SCHEMA IF NOT EXISTS `aniquiz` DEFAULT CHARACTER SET utf8 ;
 USE `aniquiz` ;
 
 -- -----------------------------------------------------
--- Table `aniquiz`.`author`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `aniquiz`.`author` ;
-
-CREATE TABLE IF NOT EXISTS `aniquiz`.`author` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `username` VARCHAR(30) NOT NULL,
-  `email` VARCHAR(255) NOT NULL,
-  `password` VARCHAR(32) NOT NULL,
-  `created_at` TIMESTAMP NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `aniquiz`.`series`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `aniquiz`.`series` ;
@@ -41,6 +25,22 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `aniquiz`.`contributor`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `aniquiz`.`contributor` ;
+
+CREATE TABLE IF NOT EXISTS `aniquiz`.`contributor` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `username` VARCHAR(30) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `password` VARCHAR(32) NOT NULL,
+  `created_at` TIMESTAMP NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `aniquiz`.`question`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `aniquiz`.`question` ;
@@ -50,32 +50,32 @@ CREATE TABLE IF NOT EXISTS `aniquiz`.`question` (
   `type` VARCHAR(5) NOT NULL,
   `difficulty` VARCHAR(3) NOT NULL,
   `created_at` DATETIME NULL,
-  `author_id` INT NOT NULL,
+  `contributor_id` INT NOT NULL,
   `series_id` INT NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_question_author_idx` (`author_id` ASC) VISIBLE,
   INDEX `fk_question_series1_idx` (`series_id` ASC) VISIBLE,
-  CONSTRAINT `fk_question_author`
-    FOREIGN KEY (`author_id`)
-    REFERENCES `aniquiz`.`author` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+  INDEX `fk_question_contributor1_idx` (`contributor_id` ASC) VISIBLE,
   CONSTRAINT `fk_question_series1`
     FOREIGN KEY (`series_id`)
     REFERENCES `aniquiz`.`series` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_question_contributor1`
+    FOREIGN KEY (`contributor_id`)
+    REFERENCES `aniquiz`.`contributor` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `aniquiz`.`locale`
+-- Table `aniquiz`.`language`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `aniquiz`.`locale` ;
+DROP TABLE IF EXISTS `aniquiz`.`language` ;
 
-CREATE TABLE IF NOT EXISTS `aniquiz`.`locale` (
+CREATE TABLE IF NOT EXISTS `aniquiz`.`language` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `code` VARCHAR(15) NOT NULL,
+  `code` VARCHAR(6) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -87,19 +87,19 @@ DROP TABLE IF EXISTS `aniquiz`.`title` ;
 
 CREATE TABLE IF NOT EXISTS `aniquiz`.`title` (
   `question_id` INT NOT NULL,
-  `locale_id` INT NOT NULL,
+  `language_id` INT NOT NULL,
   `name` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`question_id`, `locale_id`),
+  PRIMARY KEY (`question_id`, `language_id`),
   INDEX `fk_title_question1_idx` (`question_id` ASC) VISIBLE,
-  INDEX `fk_title_locale1_idx` (`locale_id` ASC) VISIBLE,
+  INDEX `fk_title_language1_idx` (`language_id` ASC) VISIBLE,
   CONSTRAINT `fk_title_question1`
     FOREIGN KEY (`question_id`)
     REFERENCES `aniquiz`.`question` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_title_locale1`
-    FOREIGN KEY (`locale_id`)
-    REFERENCES `aniquiz`.`locale` (`id`)
+  CONSTRAINT `fk_title_language1`
+    FOREIGN KEY (`language_id`)
+    REFERENCES `aniquiz`.`language` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -115,12 +115,12 @@ CREATE TABLE IF NOT EXISTS `aniquiz`.`proposition` (
   `name` VARCHAR(100) NOT NULL,
   `is_correct` TINYINT(1) NOT NULL,
   `title_question_id` INT NOT NULL,
-  `title_locale_id` INT NOT NULL,
+  `title_language_id` INT NOT NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_proposition_title1_idx` (`title_question_id` ASC, `title_locale_id` ASC) VISIBLE,
+  INDEX `fk_proposition_title1_idx` (`title_question_id` ASC, `title_language_id` ASC) VISIBLE,
   CONSTRAINT `fk_proposition_title1`
-    FOREIGN KEY (`title_question_id` , `title_locale_id`)
-    REFERENCES `aniquiz`.`title` (`question_id` , `locale_id`)
+    FOREIGN KEY (`title_question_id` , `title_language_id`)
+    REFERENCES `aniquiz`.`title` (`question_id` , `language_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;

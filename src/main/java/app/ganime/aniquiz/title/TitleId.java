@@ -16,6 +16,6 @@ import java.io.Serializable;
 @Embeddable
 public class TitleId implements Serializable {
 	private Long questionId;
-	@Column(name = "locale_id")
+	@Column(name = "language_id")
 	private Long languageId;
 }

@@ -43,7 +43,7 @@ public class Question {
 	private Series series;
 
 	@ManyToOne
-	@JoinColumn(name = "author_id", referencedColumnName = "id")
+	@JoinColumn(name = "contributor_id", referencedColumnName = "id")
 	private Contributor contributor;
 
 	@OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
