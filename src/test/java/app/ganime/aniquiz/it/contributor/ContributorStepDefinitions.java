@@ -10,14 +10,12 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Slf4j
 public class ContributorStepDefinitions {
 
 	@Autowired
@@ -85,7 +83,6 @@ public class ContributorStepDefinitions {
 	public void the_registration_is_rejected() throws Exception {
 		ApiErrorDTO error = mapper.readValue(body, ApiErrorDTO.class);
 		ApiErrorDTO.Error emailError = error.getError().getErrors().stream().findFirst().orElse(null);
-		log.info(error.toString());
 
 		assertThat(error.getError().getCode()).isEqualTo(400);
 		assertThat(error.getError().getMessage()).isEqualTo(ERROR_MSG);

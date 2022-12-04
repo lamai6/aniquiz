@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 @Component
@@ -19,6 +20,7 @@ public class HttpClient<T> {
 
 	private final String HOSTNAME = "http://localhost";
 	private HttpHeaders headers;
+	public String token;
 	@LocalServerPort
 	private int port;
 	@Autowired
@@ -29,6 +31,14 @@ public class HttpClient<T> {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 		this.headers = headers;
+	}
+
+	@PostConstruct
+	private void getToken() {
+		this.token = restTemplate
+			.postForEntity(getBaseUrl() + "token", new HttpEntity<>(this.headers), String.class)
+			.getBody();
+		this.headers.setBearerAuth(this.token);
 	}
 
 	public ResponseEntity<T[]> get(String resource, Class<T[]> entity) {
