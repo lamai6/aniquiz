@@ -20,7 +20,7 @@ public class AuthService {
 
 	public String generateToken(Authentication authentication) {
 		Instant now = Instant.now();
-		String scope = authentication
+		String roles = authentication
 			.getAuthorities().stream()
 			.map(GrantedAuthority::getAuthority)
 			.collect(Collectors.joining(" "));
@@ -30,7 +30,7 @@ public class AuthService {
 			.issuedAt(now)
 			.expiresAt(now.plus(7, ChronoUnit.DAYS))
 			.subject(authentication.getName())
-			.claim("scope", scope)
+			.claim("roles", roles)
 			.build();
 
 		return this.encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
