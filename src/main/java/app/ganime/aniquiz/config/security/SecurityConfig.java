@@ -7,42 +7,47 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.Customizer;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-@Configuration
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @EnableWebSecurity
 public class SecurityConfig {
 
 	private final RsaKeyProperties rsaKeys;
+	private final JpaUserDetailsService userDetailsService;
 
-	public SecurityConfig(RsaKeyProperties rsaKeys) {
+	public SecurityConfig(RsaKeyProperties rsaKeys, JpaUserDetailsService userDetailsService) {
 		this.rsaKeys = rsaKeys;
+		this.userDetailsService = userDetailsService;
 	}
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		return http
-			.authorizeRequests(auth -> auth.anyRequest().authenticated())
+			.authorizeRequests(auth -> auth
+				.antMatchers(HttpMethod.POST, "/contributors").permitAll()
+				.anyRequest().authenticated())
 			.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.userDetailsService(userDetailsService)
 			.csrf(AbstractHttpConfigurer::disable)
 			.exceptionHandling(ex -> ex
 				.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
@@ -57,23 +62,18 @@ public class SecurityConfig {
 			.requestMatcher(new AntPathRequestMatcher("/token"))
 			.authorizeRequests(auth -> auth.anyRequest().authenticated())
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.userDetailsService(userDetailsService)
 			.csrf(AbstractHttpConfigurer::disable)
 			.exceptionHandling(ex -> ex
 				.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
 				.accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
-			.httpBasic(Customizer.withDefaults())
+			.httpBasic(withDefaults())
 			.build();
 	}
 
 	@Bean
-	public InMemoryUserDetailsManager users() {
-		return new InMemoryUserDetailsManager(
-			User
-				.withUsername("lam")
-				.password("{noop}password")
-				.authorities("read")
-				.build()
-		);
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
 	}
 
 	@Bean

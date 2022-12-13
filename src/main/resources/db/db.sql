@@ -33,7 +33,8 @@ CREATE TABLE IF NOT EXISTS `aniquiz`.`contributor` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(30) NOT NULL,
   `email` VARCHAR(255) NOT NULL,
-  `password` VARCHAR(32) NOT NULL,
+  `password` VARCHAR(70) NOT NULL,
+  `roles` VARCHAR(255) NOT NULL,
   `created_at` TIMESTAMP NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE)

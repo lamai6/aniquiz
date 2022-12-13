@@ -52,8 +52,8 @@ public class ContributorControllerUnitTest {
 		JacksonTester.initFields(this, JsonMapper.builder().findAndAddModules().build());
 		mvc = MockMvcBuilders.standaloneSetup(controller).build();
 		contributorList = Stream.of(
-				new Contributor(1L, "akagami", "shanks92@gmail.com", "@kagami92", LocalDateTime.now()),
-				new Contributor(2L, "kurosaki", "ichigo95@outlook.com", "bankai", LocalDateTime.now()))
+				new Contributor(1L, "akagami", "shanks92@gmail.com", "@kagami92", "ROLE_CONTRIBUTOR", LocalDateTime.now()),
+				new Contributor(2L, "kurosaki", "ichigo95@outlook.com", "bankai", "ROLE_CONTRIBUTOR", LocalDateTime.now()))
 			.collect(Collectors.toList());
 	}
 
@@ -120,6 +120,7 @@ public class ContributorControllerUnitTest {
 			contributorDTO.getUsername(),
 			contributorDTO.getEmail(),
 			contributorDTO.getPassword(),
+			contributorDTO.getRoles(),
 			contributorDTO.getCreatedAt());
 		given(mapper.map(any(ContributorDTO.class), eq(Contributor.class))).willReturn(contributor);
 		given(service.saveContributor(any(Contributor.class))).will(returnsFirstArg());

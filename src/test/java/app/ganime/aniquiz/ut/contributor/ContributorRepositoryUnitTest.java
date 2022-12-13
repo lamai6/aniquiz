@@ -38,8 +38,8 @@ public class ContributorRepositoryUnitTest {
 	@BeforeAll
 	public static void initData() {
 		contributorDB = Stream.of(
-				new Contributor(1L, "akagami", "shanks92@gmail.com", "@kagami92", LocalDateTime.now()),
-				new Contributor(2L, "kurosaki", "ichigo95@outlook.com", "bankai", LocalDateTime.now()))
+				new Contributor(1L, "akagami", "shanks92@gmail.com", "@kagami92", "ROLE_CONTRIBUTOR", LocalDateTime.now()),
+				new Contributor(2L, "kurosaki", "ichigo95@outlook.com", "bankai", "ROLE_CONTRIBUTOR", LocalDateTime.now()))
 			.collect(Collectors.toList());
 	}
 
@@ -73,7 +73,7 @@ public class ContributorRepositoryUnitTest {
 
 	@Test
 	public void shouldAddContributor() {
-		Contributor contributor = new Contributor(3L, "roronoa95", "roronoa95@gmail.com", "onepiece", LocalDateTime.now());
+		Contributor contributor = new Contributor(3L, "roronoa95", "roronoa95@gmail.com", "onepiece", "ROLE_CONTRIBUTOR", LocalDateTime.now());
 
 		Contributor contributorSaved = repository.save(contributor);
 

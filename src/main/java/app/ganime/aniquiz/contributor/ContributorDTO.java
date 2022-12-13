@@ -20,6 +20,7 @@ public class ContributorDTO {
 	@Email(message = "{contributor.email.invalid}")
 	private String email;
 	private String password;
+	private String roles;
 	@JsonProperty("created_at")
 	@JsonFormat(shape = JsonFormat.Shape.STRING)
 	private LocalDateTime createdAt;

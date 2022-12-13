@@ -29,6 +29,9 @@ public class Contributor {
 	@Column(nullable = false)
 	private String password;
 
+	@Column(nullable = false)
+	private String roles;
+
 	@Column
 	private LocalDateTime createdAt;
 }
