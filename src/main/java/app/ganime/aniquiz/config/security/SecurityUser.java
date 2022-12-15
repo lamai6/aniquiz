@@ -16,6 +16,10 @@ public class SecurityUser implements UserDetails {
 		this.contributor = contributor;
 	}
 
+	public Long getId() {
+		return contributor.getId();
+	}
+
 	@Override
 	public String getUsername() {
 		return contributor.getEmail();

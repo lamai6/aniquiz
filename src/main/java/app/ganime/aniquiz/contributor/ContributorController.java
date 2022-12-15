@@ -3,6 +3,7 @@ package app.ganime.aniquiz.contributor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -18,6 +19,7 @@ public class ContributorController {
 	@Autowired
 	private ModelMapper mapper;
 
+	@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 	@GetMapping
 	public List<ContributorDTO> getContributors() {
 		List<Contributor> contributors = service.getContributors();
@@ -33,6 +35,7 @@ public class ContributorController {
 		return service.saveContributor(contributor).getId();
 	}
 
+	@PreAuthorize("principal.id == #id")
 	@GetMapping("/{id}")
 	public ContributorDTO getContributor(@PathVariable("id") Long id) {
 		Contributor contributor = service.getContributor(id);
