@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -20,8 +21,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
@@ -30,14 +29,17 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
 	private final RsaKeyProperties rsaKeys;
 	private final JpaUserDetailsService userDetailsService;
+	private final JwtUserDetailsAuthenticationConverter jwtAuthenticationConverter;
 
-	public SecurityConfig(RsaKeyProperties rsaKeys, JpaUserDetailsService userDetailsService) {
+	public SecurityConfig(RsaKeyProperties rsaKeys, JpaUserDetailsService userDetailsService, JwtUserDetailsAuthenticationConverter jwtAuthenticationConverter) {
 		this.rsaKeys = rsaKeys;
 		this.userDetailsService = userDetailsService;
+		this.jwtAuthenticationConverter = jwtAuthenticationConverter;
 	}
 
 	@Bean
@@ -46,7 +48,9 @@ public class SecurityConfig {
 			.authorizeRequests(auth -> auth
 				.antMatchers(HttpMethod.POST, "/contributors").permitAll()
 				.anyRequest().authenticated())
-			.oauth2ResourceServer(customizer -> customizer.jwt().jwtAuthenticationConverter(jwtAuthenticationConverter()))
+			.oauth2ResourceServer(oauth2 -> oauth2
+				.jwt(jwt -> jwt
+					.jwtAuthenticationConverter(jwtAuthenticationConverter)))
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.userDetailsService(userDetailsService)
 			.csrf(AbstractHttpConfigurer::disable)
@@ -89,14 +93,5 @@ public class SecurityConfig {
 		JWK jwk = new RSAKey.Builder(rsaKeys.publicKey()).privateKey(rsaKeys.privateKey()).build();
 		JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
 		return new NimbusJwtEncoder(jwks);
-	}
-
-	private JwtAuthenticationConverter jwtAuthenticationConverter() {
-		JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-		jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
-		jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
-		JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
-		return jwtAuthenticationConverter;
 	}
 }
