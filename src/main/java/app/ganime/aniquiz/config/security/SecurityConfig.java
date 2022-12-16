@@ -7,9 +7,10 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,9 +25,6 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -46,13 +44,12 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		return http
 			.authorizeRequests(auth -> auth
-				.antMatchers(HttpMethod.POST, "/contributors").permitAll()
+				.antMatchers(HttpMethod.POST, "/contributors", "/token").permitAll()
 				.anyRequest().authenticated())
 			.oauth2ResourceServer(oauth2 -> oauth2
 				.jwt(jwt -> jwt
 					.jwtAuthenticationConverter(jwtAuthenticationConverter)))
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.userDetailsService(userDetailsService)
 			.csrf(AbstractHttpConfigurer::disable)
 			.exceptionHandling(ex -> ex
 				.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
@@ -61,19 +58,11 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	@Order(Ordered.HIGHEST_PRECEDENCE)
-	public SecurityFilterChain tokenSecurityFilterChain(HttpSecurity http) throws Exception {
-		return http
-			.requestMatcher(new AntPathRequestMatcher("/token"))
-			.authorizeRequests(auth -> auth.anyRequest().authenticated())
-			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.userDetailsService(userDetailsService)
-			.csrf(AbstractHttpConfigurer::disable)
-			.exceptionHandling(ex -> ex
-				.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
-				.accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
-			.httpBasic(withDefaults())
-			.build();
+	public AuthenticationManager authManager(PasswordEncoder encoder) {
+		var authProvider = new DaoAuthenticationProvider();
+		authProvider.setUserDetailsService(this.userDetailsService);
+		authProvider.setPasswordEncoder(encoder);
+		return new ProviderManager(authProvider);
 	}
 
 	@Bean
