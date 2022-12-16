@@ -1,5 +1,6 @@
 package app.ganime.aniquiz.contributor;
 
+import app.ganime.aniquiz.config.security.AuthorizeOwnerOnly;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ public class ContributorController {
 		return service.saveContributor(contributor).getId();
 	}
 
-	@PreAuthorize("principal.id == #id")
+	@AuthorizeOwnerOnly
 	@GetMapping("/{id}")
 	public ContributorDTO getContributor(@PathVariable("id") Long id) {
 		Contributor contributor = service.getContributor(id);
