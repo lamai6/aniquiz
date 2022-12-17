@@ -1,9 +1,8 @@
 package app.ganime.aniquiz.it.series;
 
-import app.ganime.aniquiz.series.SeriesDTO;
 import app.ganime.aniquiz.it.HttpClient;
+import app.ganime.aniquiz.series.SeriesDTO;
 import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.json.JSONException;
@@ -24,11 +23,8 @@ public class SeriesStepDefinitions {
 	private LocalDate releaseDate;
 	private int newSeriesId;
 	private final String SERIES_URI = "series";
-	private final String SERIES_NAME_JSON_KEY = "name";
-	private final String SERIES_AUTHOR_JSON_KEY = "author";
-	private final String SERIES_RELEASE_DATE_JSON_KEY = "release_date";
 
-	@Given("the series name is {string}")
+	@And("the series name is {string}")
 	public void the_series_is(String name) {
 		this.name = name;
 	}
@@ -45,11 +41,7 @@ public class SeriesStepDefinitions {
 
 	@When("the user sends the series")
 	public void the_user_sends_the_series() throws JSONException {
-		JSONObject series = new JSONObject();
-		series.put(SERIES_NAME_JSON_KEY, name);
-		series.put(SERIES_AUTHOR_JSON_KEY, author);
-		series.put(SERIES_RELEASE_DATE_JSON_KEY, releaseDate);
-
+		JSONObject series = createSeriesJson();
 		this.newSeriesId = (int) this.httpClient.post(SERIES_URI, series.toString(), Integer.class).getBody();
 	}
 
@@ -59,5 +51,17 @@ public class SeriesStepDefinitions {
 
 		assertThat(series.getName()).isEqualTo(this.name);
 		assertThat(series.getReleaseDate()).isEqualTo(this.releaseDate);
+	}
+
+	private JSONObject createSeriesJson() throws JSONException {
+		JSONObject series = new JSONObject();
+		String nameKey = "name";
+		String authorKey = "author";
+		String releaseDateKey = "release_date";
+
+		series.put(nameKey, name);
+		series.put(authorKey, author);
+		series.put(releaseDateKey, releaseDate);
+		return series;
 	}
 }
