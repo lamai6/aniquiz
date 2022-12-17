@@ -5,21 +5,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
 @Component
 @Scope(CucumberTestContext.SCOPE_CUCUMBER_GLUE)
 public class HttpClient<T> {
 
-	private final String HOSTNAME = "http://localhost";
-	private HttpHeaders headers;
+	private final HttpHeaders headers = new HttpHeaders();
 	public String token;
 	@LocalServerPort
 	private int port;
@@ -27,33 +22,28 @@ public class HttpClient<T> {
 	private TestRestTemplate restTemplate;
 
 	public HttpClient() {
-		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-		this.headers = headers;
-	}
-
-	@PostConstruct
-	private void getToken() {
-		this.token = restTemplate
-			.postForEntity(getBaseUrl() + "token", new HttpEntity<>(this.headers), String.class)
-			.getBody();
-		this.headers.setBearerAuth(this.token);
 	}
 
 	public ResponseEntity<T[]> get(String resource, Class<T[]> entity) {
-		return restTemplate.getForEntity(getBaseUrl() + resource, entity);
+		return restTemplate.exchange(getBaseUrl() + resource, HttpMethod.GET, new HttpEntity<>(this.headers), entity);
 	}
 
 	public ResponseEntity<T> get(String resource, int id, Class<T> entity) {
-		return restTemplate.getForEntity(getBaseUrl() + resource + "/" + id, entity);
+		return restTemplate.exchange(getBaseUrl() + resource + "/" + id, HttpMethod.GET, new HttpEntity<>(this.headers), entity);
 	}
 
 	public ResponseEntity<T> post(String resource, String body, Class<T> entity) {
 		return restTemplate.postForEntity(getBaseUrl() + resource, new HttpEntity<>(body, this.headers), entity);
 	}
 
+	public void setBearerToken(String token) {
+		this.headers.setBearerAuth(token);
+	}
+
 	private String getBaseUrl() {
-		return HOSTNAME + ":" + port + "/";
+		String hostname = "http://localhost";
+		return hostname + ":" + port + "/";
 	}
 }

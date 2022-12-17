@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 
 import javax.sql.DataSource;
@@ -31,11 +30,6 @@ public class CucumberSpringConfiguration {
 			dataSourceBuilder.username(dbUsername);
 			dataSourceBuilder.password(dbPassword);
 			return dataSourceBuilder.build();
-		}
-
-		@Bean
-		public RestTemplateBuilder restTemplateBuilder() {
-			return new RestTemplateBuilder().basicAuthentication("lam", "password");
 		}
 	}
 }
