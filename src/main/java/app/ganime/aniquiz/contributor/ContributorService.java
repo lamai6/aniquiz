@@ -2,6 +2,7 @@ package app.ganime.aniquiz.contributor;
 
 import app.ganime.aniquiz.config.error.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -11,10 +12,12 @@ import java.util.List;
 public class ContributorService {
 
 	@Autowired
-	public ContributorRepository repository;
+	private ContributorRepository repository;
+	@Autowired
+	private PasswordEncoder encoder;
 
 	public Contributor getContributor(Long id) {
-		return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException());
+		return repository.findById(id).orElseThrow(ResourceNotFoundException::new);
 	}
 
 	public List<Contributor> getContributors() {
@@ -22,6 +25,8 @@ public class ContributorService {
 	}
 
 	public Contributor saveContributor(Contributor contributor) {
+		contributor.setPassword(encoder.encode(contributor.getPassword()));
+		contributor.setRoles("CONTRIBUTOR");
 		contributor.setCreatedAt(LocalDateTime.now());
 		return repository.save(contributor);
 	}

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,14 +30,16 @@ public class ContributorServiceUnitTest {
 	private List<Contributor> contributorList;
 	@Mock
 	public ContributorRepository repository;
+	@Mock
+	public PasswordEncoder encoder;
 	@InjectMocks
 	public ContributorService service;
 
 	@BeforeEach
 	private void setup() {
 		contributorList = Stream.of(
-				new Contributor(1L, "akagami", "shanks92@gmail.com", "@kagami92", "ROLE_CONTRIBUTOR", LocalDateTime.now()),
-				new Contributor(2L, "kurosaki", "ichigo95@outlook.com", "bankai", "ROLE_CONTRIBUTOR", LocalDateTime.now()))
+				new Contributor(1L, "akagami", "shanks92@gmail.com", "@kagami92", "CONTRIBUTOR", LocalDateTime.now()),
+				new Contributor(2L, "kurosaki", "ichigo95@outlook.com", "bankai", "CONTRIBUTOR", LocalDateTime.now()))
 			.collect(Collectors.toList());
 	}
 
@@ -73,7 +76,7 @@ public class ContributorServiceUnitTest {
 
 	@Test
 	public void shouldSaveContributorRegistration() {
-		Contributor contributor = new Contributor(3L, "roronoa95", "roronoa95@gmail.com", "onepiece", "ROLE_CONTRIBUTOR", LocalDateTime.now());
+		Contributor contributor = new Contributor(3L, "roronoa95", "roronoa95@gmail.com", "onepiece", "CONTRIBUTOR", LocalDateTime.now());
 		given(repository.save(any(Contributor.class))).will(returnsFirstArg());
 
 		Contributor contributorSaved = service.saveContributor(contributor);
