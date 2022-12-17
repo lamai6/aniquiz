@@ -23,23 +23,14 @@ public class ContributorStepDefinitions {
 	@Autowired
 	private ContributorRepository repository;
 
-	private ObjectMapper mapper;
 	private String username;
 	private String email;
 	private String password;
 	private String body;
+	private final String EMAIL_KEY = "email";
+	private final String PASSWORD_KEY = "password";
 	private final String CONTRIBUTOR_URI = "contributors";
-	private final String USERNAME_JSON_KEY = "username";
-	private final String EMAIL_JSON_KEY = "email";
-	private final String PASSWORD_JSON_KEY = "password";
-	private final String ID_KEY = "id";
-	private final String ERROR_KEY = "error";
-	private final String ERROR_MSG = "The account registration failed";
-	private final String INVALID_EMAIL = "Invalid email";
-
-	public ContributorStepDefinitions() {
-		this.mapper = new ObjectMapper();
-	}
+	private final ObjectMapper mapper = new ObjectMapper();
 
 	@After
 	public void cleanDatabase() {
@@ -63,12 +54,13 @@ public class ContributorStepDefinitions {
 
 	@When("the contributor registers")
 	public void the_contributor_registers() throws JSONException {
-		JSONObject contributor = new JSONObject();
-		contributor.put(USERNAME_JSON_KEY, username);
-		contributor.put(EMAIL_JSON_KEY, email);
-		contributor.put(PASSWORD_JSON_KEY, password);
-
+		JSONObject contributor = createContributorJson();
 		this.body = (String) this.httpClient.post(CONTRIBUTOR_URI, contributor.toString(), String.class).getBody();
+
+		String tokenURI = "/token";
+		JSONObject login = createLoginJson();
+		String token = (String) this.httpClient.post(tokenURI, login.toString(), String.class).getBody();
+		this.httpClient.setBearerToken(token);
 	}
 
 	@Then("the contributor is registered")
@@ -81,11 +73,29 @@ public class ContributorStepDefinitions {
 
 	@Then("the registration is rejected")
 	public void the_registration_is_rejected() throws Exception {
+		String errorMessage = "The account registration failed";
+		String invalidEmailMessage = "Invalid email";
 		ApiErrorDTO error = mapper.readValue(body, ApiErrorDTO.class);
 		ApiErrorDTO.Error emailError = error.getError().getErrors().stream().findFirst().orElse(null);
 
 		assertThat(error.getError().getCode()).isEqualTo(400);
-		assertThat(error.getError().getMessage()).isEqualTo(ERROR_MSG);
-		assertThat(emailError.getMessage()).isEqualTo(INVALID_EMAIL);
+		assertThat(error.getError().getMessage()).isEqualTo(errorMessage);
+		assertThat(emailError.getMessage()).isEqualTo(invalidEmailMessage);
+	}
+
+	private JSONObject createContributorJson() throws JSONException {
+		String usernameKey = "username";
+		JSONObject contributor = new JSONObject();
+		contributor.put(usernameKey, username);
+		contributor.put(EMAIL_KEY, email);
+		contributor.put(PASSWORD_KEY, password);
+		return contributor;
+	}
+
+	private JSONObject createLoginJson() throws JSONException {
+		JSONObject login = new JSONObject();
+		login.put(EMAIL_KEY, email);
+		login.put(PASSWORD_KEY, password);
+		return login;
 	}
 }
