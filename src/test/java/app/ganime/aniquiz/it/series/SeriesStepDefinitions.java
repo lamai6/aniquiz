@@ -2,6 +2,8 @@ package app.ganime.aniquiz.it.series;
 
 import app.ganime.aniquiz.it.HttpClient;
 import app.ganime.aniquiz.series.SeriesDTO;
+import app.ganime.aniquiz.series.SeriesRepository;
+import io.cucumber.java.After;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -17,12 +19,19 @@ public class SeriesStepDefinitions {
 
 	@Autowired
 	private HttpClient httpClient;
+	@Autowired
+	private SeriesRepository repository;
 
 	private String name;
 	private String author;
 	private LocalDate releaseDate;
 	private int newSeriesId;
 	private final String SERIES_URI = "series";
+
+	@After
+	private void cleanSeries() {
+		 repository.deleteById((long) newSeriesId);
+	}
 
 	@And("the series name is {string}")
 	public void the_series_is(String name) {
