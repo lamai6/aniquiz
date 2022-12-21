@@ -16,7 +16,7 @@ import java.util.Locale;
 @Getter
 @Setter
 @Entity
-@Table(name = "locale")
+@Table(name = "language")
 public class Language {
 
 	@Id
