@@ -1,7 +1,8 @@
 Feature: Question
 
   Scenario: Adding a new easy single-choice question
-    Given I want to add a question, as a contributor
+    Given I am a contributor
+    And I want to add a question
       | title                             | series    | type | difficulty | language |
       | How much is Luffy's first bounty? | One Piece | SCQ  | E          | en       |
     And the propositions of this question are
@@ -14,7 +15,8 @@ Feature: Question
     Then the question is added to the API
 
   Scenario: Rejecting contributor multiple-choice question because only one proposition is correct
-    Given I want to add a question, as a contributor
+    Given I am a contributor
+    And I want to add a question
       | title                                                  | series             | type | difficulty | language |
       | What is the distance between Wall Maria and Wall Sina? | Shingeki no Kyojin | MCQ  | H          | en       |
     And the propositions of this question are

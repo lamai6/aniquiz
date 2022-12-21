@@ -1,19 +1,30 @@
 package app.ganime.aniquiz.it.question;
 
 import app.ganime.aniquiz.config.error.ApiErrorDTO;
+import app.ganime.aniquiz.contributor.ContributorRepository;
 import app.ganime.aniquiz.it.HttpClient;
+import app.ganime.aniquiz.language.Language;
+import app.ganime.aniquiz.language.LanguageRepository;
 import app.ganime.aniquiz.proposition.PropositionDTO;
 import app.ganime.aniquiz.question.QuestionDTO;
+import app.ganime.aniquiz.question.QuestionRepository;
+import app.ganime.aniquiz.series.Series;
+import app.ganime.aniquiz.series.SeriesRepository;
+import app.ganime.aniquiz.title.TitleDTO;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
 import io.cucumber.java.DataTableType;
 import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -25,10 +36,36 @@ public class QuestionStepDefinitions {
 
 	@Autowired
 	private HttpClient httpClient;
+	@Autowired
+	private SeriesRepository seriesRepository;
+	@Autowired
+	private ContributorRepository contributorRepository;
+	@Autowired
+	private QuestionRepository questionRepository;
+	@Autowired
+	private LanguageRepository languageRepository;
 	private Map<String, Object> question = new HashMap<String, Object>();
 	private final ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
 	private final String QUESTION_URI = "questions";
 	private String responseBody;
+
+	@Before
+	public void save() {
+		Series onePiece = new Series(null,"One Piece","Eichiro Oda", LocalDate.of(1999, 10, 20));
+		Series bleach = new Series(null,"Shingeki no Kyojin","Hajime Isayama", LocalDate.of(2009, 9, 9));
+		seriesRepository.save(onePiece);
+		seriesRepository.save(bleach);
+		Language en = new Language(null, Locale.ENGLISH, null);
+		languageRepository.save(en);
+	}
+
+	@After
+	public void clean() {
+		questionRepository.deleteAll();
+		seriesRepository.deleteAll();
+		contributorRepository.deleteAll();
+		languageRepository.deleteAll();
+	}
 
 	@DataTableType
 	public Map<String, Object> questionEntry(Map<String, String> entry) {
@@ -51,7 +88,7 @@ public class QuestionStepDefinitions {
 			.build();
 	}
 
-	@Given("^I want to add a question, as a contributor$")
+	@And("^I want to add a question$")
 	public void i_want_to_add_a_question_as_a_contributor(List<Map<String, Object>> entry) throws JsonProcessingException {
 		this.question = entry.stream().findFirst().orElse(null);
 	}
@@ -74,15 +111,17 @@ public class QuestionStepDefinitions {
 	}
 
 	@Then("^the question is added to the API$")
-	public void the_question_is_added_to_the_API() {
+	public void the_question_is_added_to_the_API() throws JSONException {
 		QuestionDTO questionAdded = (QuestionDTO) this.httpClient.get(QUESTION_URI, Integer.parseInt(this.responseBody), QuestionDTO.class).getBody();
 
-		assertThat(questionAdded.getType()).isEqualTo(this.question.get("type"));
-		assertThat(questionAdded.getDifficulty()).isEqualTo(this.question.get("difficulty"));
-		assertThat(questionAdded.getSeries().getName()).isEqualTo(this.question.get("series"));
-		assertThat(questionAdded.getTitles().stream().findFirst().orElse(null).getName()).isEqualTo(this.question.get("title"));
-		assertThat(questionAdded.getTitles().stream().findFirst().orElse(null).getLanguage().getCode())
-			.isEqualTo(Locale.forLanguageTag((String) this.question.get("language")));
+		TitleDTO titleAdded = questionAdded.getTitles().stream().findFirst().orElse(null);
+		Map titleMap = ((List<Map>) question.get("titles")).stream().findFirst().get();
+
+		assertThat(questionAdded.getType().name()).isEqualTo(this.question.get("type"));
+		assertThat(questionAdded.getDifficulty().name()).isEqualTo(this.question.get("difficulty"));
+		assertThat(questionAdded.getSeries().getName()).isEqualTo(new JSONObject((Map) this.question.get("series")).getString("name"));
+		assertThat(titleAdded.getName()).isEqualTo(titleMap.get("name"));
+		assertThat(titleAdded.getLanguage().getCode()).isEqualTo(Locale.forLanguageTag( (String) ((Map) titleMap.get("language")).get("code") ));
 	}
 
 	@Then("^the question is rejected$")

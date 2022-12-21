@@ -14,6 +14,7 @@ import io.cucumber.java.en.When;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 
@@ -25,6 +26,8 @@ public class ContributorStepDefinitions {
 	private HttpClient httpClient;
 	@Autowired
 	private ContributorRepository repository;
+	@Autowired
+	private PasswordEncoder encoder;
 
 	private String username;
 	private String email;
@@ -36,14 +39,26 @@ public class ContributorStepDefinitions {
 	private final ObjectMapper mapper = new ObjectMapper();
 
 	@After
-	public void cleanDatabase() {
-		repository.deleteAll();
+	public void clean() {
+		if (isNumeric(body)) repository.deleteById(Long.parseLong(body));
 	}
 
-	@Given("a contributor with admin rights")
-	public void admin_contributor_is() throws JSONException {
-		saveAdminContributorInDatabase();
-		httpClient.setBearerToken(getToken());
+	@Given("^I am a contributor$")
+	public void i_am_a_contributor() throws JSONException {
+		String username = "contrib",
+			email = "contrib@aniquiz.fr",
+			password = "contrib",
+			roles = "CONTRIBUTOR";
+		createContributor(username, email, password, roles);
+	}
+
+	@Given("^I am a contributor with admin rights$")
+	public void i_am_an_admin_contributor() throws JSONException {
+		String username = "admin",
+			email = "admin@aniquiz.fr",
+			password = "admin",
+			roles = "CONTRIBUTOR,ADMIN";
+		createContributor(username, email, password, roles);
 	}
 
 	@Given("the contributor username is {string}")
@@ -92,19 +107,17 @@ public class ContributorStepDefinitions {
 		assertThat(emailError.getMessage()).isEqualTo(invalidEmailMessage);
 	}
 
-	private void saveAdminContributorInDatabase() {
-		repository.save(new Contributor(null,
-			"admin",
-			"admin@aniquiz.fr",
-			"$2y$10$tyH1OKo7940z0ucMB2VVQe9KshaS7k3OTbOQJ6MylEBVv301EmESe",
-			"CONTRIBUTOR,ADMIN",
-			LocalDateTime.now()));
+	private void createContributor(String username, String email, String password, String roles) throws JSONException {
+		Contributor contrib = repository.save(new Contributor(null, username, email, encoder.encode(password), roles, LocalDateTime.now()));
+		String token = getToken(email, password);
+		httpClient.setBearerToken(token);
+
 	}
 
-	private String getToken() throws JSONException {
+	private String getToken(String email, String password) throws JSONException {
 		JSONObject login = new JSONObject();
-		login.put(EMAIL_KEY, "admin@aniquiz.fr");
-		login.put(PASSWORD_KEY, "admin");
+		login.put(EMAIL_KEY, email);
+		login.put(PASSWORD_KEY, password);
 		return (String) httpClient.post("/token", login.toString(), String.class).getBody();
 	}
 
@@ -122,5 +135,14 @@ public class ContributorStepDefinitions {
 		login.put(EMAIL_KEY, email);
 		login.put(PASSWORD_KEY, password);
 		return login;
+	}
+
+	private boolean isNumeric(String number) {
+		try {
+			Integer.parseInt(number);
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		return true;
 	}
 }
