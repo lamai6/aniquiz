@@ -22,7 +22,7 @@ import java.util.List;
 public class Title {
 
 	@EmbeddedId
-	private TitleId id;
+	private TitleId id = new TitleId();
 
 	private String name;
 

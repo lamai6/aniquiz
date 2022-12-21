@@ -17,6 +17,9 @@ import java.time.LocalDate;
 @Jacksonized
 public class SeriesDTO {
 
+	@JsonProperty("id")
+	private String id;
+
 	@JsonProperty("name")
 	private String name;
 

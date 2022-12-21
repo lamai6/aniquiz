@@ -28,8 +28,7 @@ public class QuestionController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public Long postQuestions(@RequestBody QuestionDTO questionDTO) {
-		Question question = mapper.map(questionDTO, Question.class);
-		return service.saveQuestion(question).getId();
+		return service.saveQuestion(questionDTO).getId();
 	}
 
 	@GetMapping("/{id}")

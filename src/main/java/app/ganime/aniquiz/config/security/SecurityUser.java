@@ -20,6 +20,10 @@ public class SecurityUser implements UserDetails {
 		return contributor.getId();
 	}
 
+	public Contributor getContributor() {
+		return contributor;
+	}
+
 	@Override
 	public String getUsername() {
 		return contributor.getEmail();

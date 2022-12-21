@@ -13,7 +13,11 @@ public class SeriesService {
 	private SeriesRepository repository;
 
 	public Series getSeries(Long id) {
-		return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException());
+		return repository.findById(id).orElseThrow(ResourceNotFoundException::new);
+	}
+
+	public Series getSeries(String name) {
+		return repository.findByName(name).orElseThrow(ResourceNotFoundException::new);
 	}
 
 	public List<Series> getSeries() {
