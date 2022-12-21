@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
+import java.util.NoSuchElementException;
+import java.util.stream.Stream;
+
 public enum Type {
 	TOF("True or False ?"),
 	SCQ("Single Choice Question"),
@@ -19,6 +22,13 @@ public enum Type {
 
 	@JsonCreator
 	public static Type getEnumFrom(String value) {
-		return Type.valueOf(value);
+		try {
+			return Type.valueOf(value);
+		} catch (IllegalArgumentException e) {
+			return Stream.of(Type.class.getEnumConstants())
+				.filter(Type -> Type.getDescription().equals(value))
+				.findFirst()
+				.orElseThrow(NoSuchElementException::new);
+		}
 	}
 }

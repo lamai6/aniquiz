@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
+import java.util.NoSuchElementException;
+import java.util.stream.Stream;
+
 public enum Difficulty {
 	E("Easy"),
 	N("Normal"),
@@ -19,6 +22,13 @@ public enum Difficulty {
 
 	@JsonCreator
 	public static Difficulty getEnumFrom(String value) {
-		return Difficulty.valueOf(value);
+		try {
+			return Difficulty.valueOf(value);
+		} catch (IllegalArgumentException e) {
+			return Stream.of(Difficulty.class.getEnumConstants())
+				.filter(Difficulty -> Difficulty.getDescription().equals(value))
+				.findFirst()
+				.orElseThrow(NoSuchElementException::new);
+		}
 	}
 }
