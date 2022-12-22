@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `aniquiz`.`series` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(200) NOT NULL,
   `author` VARCHAR(200) NOT NULL,
-  `release_date` DATETIME NOT NULL,
+  `release_date` DATE NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
