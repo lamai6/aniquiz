@@ -103,7 +103,7 @@ public class ContributorControllerUnitTest {
 		assertThat(body.length()).isEqualTo(2);
 		assertThat(firstContributor.getString("username")).isEqualTo(contributor.getUsername());
 		assertThat(firstContributor.getString("email")).isEqualTo(contributor.getEmail());
-		assertThat(firstContributor.getString("password")).isEqualTo("null");
+		assertThat(firstContributor.isNull("password")).isTrue();
 		assertThat(LocalDateTime.parse(firstContributor.getString("created_at"))).isEqualTo(contributor.getCreatedAt());
 	}
 
