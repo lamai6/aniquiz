@@ -37,7 +37,6 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -164,8 +163,7 @@ public class QuestionControllerUnitTest {
 		questionJSON.put("type", Arrays.stream(questionJSON.get("type").toString().split(" "))
 			.map(w -> w.substring(0,1))
 			.collect(Collectors.joining()));
-		given(modelMapper.map(any(QuestionDTO.class), eq(Question.class))).willReturn(question);
-		given(service.saveQuestion(any(Question.class))).will(returnsFirstArg());
+		given(service.saveQuestion(any(QuestionDTO.class))).willReturn(question);
 
 		MockHttpServletResponse response = mvc.perform(post("/questions")
 				.contentType(MediaType.APPLICATION_JSON)

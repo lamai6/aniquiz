@@ -1,21 +1,35 @@
 package app.ganime.aniquiz.ut.question;
 
 import app.ganime.aniquiz.config.error.exception.ResourceNotFoundException;
+import app.ganime.aniquiz.config.security.SecurityUser;
+import app.ganime.aniquiz.contributor.Contributor;
 import app.ganime.aniquiz.language.Language;
+import app.ganime.aniquiz.language.LanguageDTO;
 import app.ganime.aniquiz.proposition.Proposition;
+import app.ganime.aniquiz.proposition.PropositionDTO;
 import app.ganime.aniquiz.question.Difficulty.Difficulty;
 import app.ganime.aniquiz.question.Question;
+import app.ganime.aniquiz.question.QuestionDTO;
 import app.ganime.aniquiz.question.QuestionRepository;
 import app.ganime.aniquiz.question.QuestionService;
 import app.ganime.aniquiz.question.Type.Type;
+import app.ganime.aniquiz.series.Series;
+import app.ganime.aniquiz.series.SeriesDTO;
+import app.ganime.aniquiz.series.SeriesService;
 import app.ganime.aniquiz.title.Title;
+import app.ganime.aniquiz.title.TitleDTO;
+import app.ganime.aniquiz.title.TitleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
@@ -24,9 +38,9 @@ import java.util.Objects;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doAnswer;
 
 @ExtendWith(MockitoExtension.class)
 public class QuestionServiceUnitTest {
@@ -34,6 +48,18 @@ public class QuestionServiceUnitTest {
 	private List<Question> questionList;
 	@Mock
 	private QuestionRepository repository;
+	@Mock
+	private SecurityContext securityContext;
+	@Mock
+	private Authentication authentication;
+	@Mock
+	private SecurityUser user;
+	@Mock
+	private Contributor contributor;
+	@Mock
+	private SeriesService seriesService;
+	@Mock
+	private TitleService titleService;
 	@InjectMocks
 	private QuestionService service;
 
@@ -85,20 +111,47 @@ public class QuestionServiceUnitTest {
 
 	@Test
 	public void shouldSaveQuestionRegistration() {
-		Proposition prop1 = new Proposition(3L, "Zoro", true, null);
-		Proposition prop2 = new Proposition(4L, "Shanks", false, null);
-		Proposition prop3 = new Proposition(5L, "Brook", true, null);
-		Language en = new Language(1L, Locale.ENGLISH, null);
-		Question question = new Question(2L, Type.MCQ, Difficulty.E, LocalDateTime.now(), null, null, null);
-		Title title = new Title(null, "Which of these characters are part of Luffy's crew?", question, en, List.of(prop1, prop2, prop3));
-		question.setTitles(List.of(title));
+		QuestionDTO questionDTO = getQuestionDTO();
+		SecurityContextHolder.setContext(securityContext);
+		given(securityContext.getAuthentication()).willReturn(authentication);
+		given(authentication.getPrincipal()).willReturn(user);
+		given(user.getContributor()).willReturn(contributor);
+		Series series = new Series(1L,"One Piece","Eichiro Oda", LocalDate.of(1999, 10, 20));
+		given(seriesService.getSeries(any(String.class))).willReturn(series);
 		given(repository.save(any(Question.class))).will(returnsFirstArg());
+		doAnswer(invocation -> {
+			Question question = invocation.getArgument(1);
+			question.setTitles(List.of(new Title()));
+			return null;
+		}).when(titleService).save(anyList(), any(Question.class));
 
-		Question questionSaved = service.saveQuestion(question);
+		Question questionSaved = service.saveQuestion(questionDTO);
 
-		assertThat(questionSaved.getType()).isEqualTo(question.getType());
-		assertThat(questionSaved.getDifficulty()).isEqualTo(question.getDifficulty());
-		assertThat(questionSaved.getCreatedAt()).isEqualTo(question.getCreatedAt());
+		assertThat(questionSaved.getType()).isEqualTo(questionDTO.getType());
+		assertThat(questionSaved.getDifficulty()).isEqualTo(questionDTO.getDifficulty());
+		assertThat(questionSaved.getCreatedAt()).isNotNull();
+		assertThat(questionSaved.getContributor()).isNotNull();
+		assertThat(questionSaved.getSeries().getName()).isEqualTo(questionDTO.getSeries().getName());
 		assertThat(questionSaved.getTitles().size()).isEqualTo(1);
+	}
+
+	private QuestionDTO getQuestionDTO() {
+		PropositionDTO prop1 = new PropositionDTO("Zoro", true);
+		PropositionDTO prop2 = new PropositionDTO("Shanks", false);
+		PropositionDTO prop3 = new PropositionDTO("Brook", true);
+		LanguageDTO en = new LanguageDTO(Locale.ENGLISH);
+		QuestionDTO question = QuestionDTO.builder()
+			.type(Type.MCQ)
+			.difficulty(Difficulty.E)
+			.createdAt(LocalDateTime.now())
+			.build();
+		TitleDTO title = TitleDTO.builder()
+			.name("Which of these characters are part of Luffy's crew?")
+			.language(en)
+			.propositions(List.of(prop1, prop2, prop3))
+			.build();
+		question.setSeries(new SeriesDTO(null, "One Piece","Eichiro Oda", LocalDate.of(1999, 10, 20)));
+		question.setTitles(List.of(title));
+		return question;
 	}
 }
