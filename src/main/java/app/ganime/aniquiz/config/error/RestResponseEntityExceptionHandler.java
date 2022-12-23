@@ -1,5 +1,6 @@
 package app.ganime.aniquiz.config.error;
 
+import app.ganime.aniquiz.config.error.exception.InvalidDataException;
 import app.ganime.aniquiz.config.error.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,8 +31,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 	private MessageSource messages;
 
 
-	@ExceptionHandler(ResourceNotFoundException.class)
-	protected ResponseEntity<Object> handleResourceNotFound(ResourceNotFoundException ex, WebRequest request) {
+	@ExceptionHandler({ResourceNotFoundException.class, InvalidDataException.class})
+	protected ResponseEntity<Object> handleLogicExceptions(ApiException ex, WebRequest request) {
 		Map<String, Object> error = ApiErrorDTO.getMapFromErrors(
 			apiVersion,
 			ex.getStatus().value(),

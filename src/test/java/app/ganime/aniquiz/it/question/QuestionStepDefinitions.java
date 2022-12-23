@@ -126,13 +126,13 @@ public class QuestionStepDefinitions {
 
 	@Then("^the question is rejected$")
 	public void the_question_is_rejected() throws Exception {
-		final String ERROR_MSG = "The question has not been added due to an error";
-		final String INVALID_LOGIC_MCQ = "A multiple-choice question must have at least 2 correct propositions";
+		final String ERROR_MSG = "Bad Request";
+		final String INVALID_DATA_MCQ = "A multiple-choice question must have at least 2 correct propositions";
 		ApiErrorDTO errorDTO = mapper.readValue(this.responseBody, ApiErrorDTO.class);
 		ApiErrorDTO.Error error = errorDTO.getError().getErrors().stream().findFirst().orElse(null);
 
 		assertThat(errorDTO.getError().getCode()).isEqualTo(400);
 		assertThat(errorDTO.getError().getMessage()).isEqualTo(ERROR_MSG);
-		assertThat(error.getMessage()).isEqualTo(INVALID_LOGIC_MCQ);
+		assertThat(error.getMessage()).isEqualTo(INVALID_DATA_MCQ);
 	}
 }

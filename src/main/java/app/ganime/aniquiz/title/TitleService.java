@@ -3,6 +3,7 @@ package app.ganime.aniquiz.title;
 import app.ganime.aniquiz.language.Language;
 import app.ganime.aniquiz.language.LanguageService;
 import app.ganime.aniquiz.proposition.Proposition;
+import app.ganime.aniquiz.proposition.PropositionService;
 import app.ganime.aniquiz.question.Question;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,8 @@ public class TitleService {
 	private TitleRepository repository;
 	@Autowired
 	private LanguageService languageService;
+	@Autowired
+	private PropositionService propositionService;
 
 	public void save(List<TitleDTO> titleDTOs, Question question) {
 		List<Title> titles = new ArrayList<>();
@@ -42,6 +45,7 @@ public class TitleService {
 			titles.add(title);
 		});
 
+		propositionService.validatePropositions(titles);
 		repository.saveAll(titles);
 	}
 }
