@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -21,6 +22,8 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "question")
+@Cacheable
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Question {
 
 	@Id
@@ -46,6 +49,7 @@ public class Question {
 	@JoinColumn(name = "contributor_id", referencedColumnName = "id")
 	private Contributor contributor;
 
+	@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 	@OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
 	@JsonManagedReference("question-title")
 	private List<Title> titles;

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 import java.util.List;
@@ -19,6 +20,8 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "title")
+@Cacheable
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 public class Title {
 
 	@EmbeddedId
@@ -36,6 +39,7 @@ public class Title {
 	@JsonBackReference("language-title")
 	private Language language;
 
+	@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 	@OneToMany(mappedBy = "title", cascade = CascadeType.ALL)
 	@JsonManagedReference("title-proposition")
 	private List<Proposition> propositions;
