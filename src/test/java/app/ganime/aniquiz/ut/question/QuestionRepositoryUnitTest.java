@@ -81,17 +81,7 @@ public class QuestionRepositoryUnitTest {
 
 	@Test
 	public void shouldAddQuestion() {
-		Language english = languageRepository.findAll().stream().findFirst().orElse(null);
 		Question question = new Question(null, Type.MCQ, Difficulty.E, LocalDateTime.now(), null, null, null);
-		Title title = new Title(new TitleId(), "Which of these characters are part of Luffy's crew?", null, null, null);
-		Proposition proposition1 = new Proposition(null, "Zoro", true, title);
-		Proposition proposition2 = new Proposition(null, "Shanks", false, title);
-		Proposition proposition3 = new Proposition(null, "Brook", true, title);
-		title.setPropositions(List.of(proposition1, proposition2, proposition3));
-		title.setLanguage(english);
-		title.setQuestion(question);
-		question.setTitles(List.of(title));
-		english.setTitles(List.of(title));
 
 		Question questionSaved = questionRepository.save(question);
 
@@ -99,6 +89,5 @@ public class QuestionRepositoryUnitTest {
 		assertThat(questionSaved.getType()).isEqualTo(question.getType());
 		assertThat(questionSaved.getDifficulty()).isEqualTo(question.getDifficulty());
 		assertThat(questionSaved.getCreatedAt()).isEqualTo(question.getCreatedAt());
-		assertThat(questionSaved.getTitles()).isEqualTo(question.getTitles());
 	}
 }
